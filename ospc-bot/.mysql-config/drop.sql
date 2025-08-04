@@ -1,0 +1,8 @@
+
+USE ospc;
+
+DROP TABLE IF EXISTS BeatmapPlaycounts;
+DROP TABLE IF EXISTS DiscordPlayer;
+DROP TABLE IF EXISTS Beatmaps;
+DROP TABLE IF EXISTS BeatmapSet;
+DROP TABLE IF EXISTS Users;
