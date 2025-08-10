@@ -1,8 +1,8 @@
 namespace OSPC.Domain.Options
 {
-	public class OsuWebApiOptions
+	public class OsuWebApiOptions : IAppOptions
 	{
-		public static string Name = "OsuWebApi";
+		public static string GetOptionName() => "OsuWebApi";
 		
 		public required int ClientId { get; set; }
 		public required string ClientSecret { get; set; }

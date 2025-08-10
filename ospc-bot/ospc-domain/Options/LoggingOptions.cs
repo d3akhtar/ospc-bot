@@ -1,8 +1,8 @@
 namespace OSPC.Domain.Options
 {
-	public class LoggingOptions
+	public class LoggingOptions : IAppOptions
 	{
-		public static string Name = "Logging";
+		public static string GetOptionName() => "Logging";
 		
 		public required LogLevel LogLevel { get; set; }
 		public required bool LogToFile { get; set; }

@@ -25,10 +25,10 @@ namespace OSPC.Bot
     public class BotClient
     {
         public static BotClient Instance { get; private set; }
-        private readonly DiscordSocketClient _client;
-        private readonly CommandService _cmds;
-        private readonly InteractionService _interactService;
-        private readonly IServiceProvider _serviceProvider;
+        private DiscordSocketClient _client;
+        private CommandService _cmds;
+        private InteractionService _interactService;
+        private IServiceProvider _serviceProvider;
 
         public event Func<ulong,Task>? PageForEmbedUpdated;
         public Dictionary<ulong, int> CurrentPageForEmbed { get; set; } = new();
@@ -37,16 +37,18 @@ namespace OSPC.Bot
         public BotClient()
         {
             Instance = this;
-            
+
+            SetupClient();
+            SetupServiceProvider();
+        }
+
+        private void SetupClient()
+        {
             DiscordSocketConfig discordSocketConfig = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
             };
-
-            IConfiguration config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
+            
             _client = new DiscordSocketClient(discordSocketConfig);
             
             _client.Ready += OnClientReady;
@@ -59,35 +61,22 @@ namespace OSPC.Bot
 
             _interactService = new InteractionService(_client.Rest);
             _cmds = new CommandService();
+        }
+
+        private void SetupServiceProvider()
+        {
+            IConfiguration config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
 
             var serviceCollection = new ServiceCollection();
 
             serviceCollection
-                .AddOptions<DatabaseOptions>()
-                .Bind(config.GetSection(DatabaseOptions.Name))
-                .ValidateDataAnnotations();
-
-            serviceCollection
-                .AddOptions<DiscordOptions>()
-                .Bind(config.GetSection(DiscordOptions.Name))
-                .ValidateDataAnnotations();
-
-            serviceCollection
-                .AddOptions<LoggingOptions>()
-                .Bind(config.GetSection(LoggingOptions.Name))
-                .ValidateDataAnnotations();
-
-            serviceCollection
-                .AddOptions<OsuWebApiOptions>()
-                .Bind(config.GetSection(OsuWebApiOptions.Name))
-                .ValidateDataAnnotations();
-
-            serviceCollection
-                .AddOptions<CacheOptions>()
-                .Bind(config.GetSection(CacheOptions.Name))
-                .ValidateDataAnnotations();
-
-            serviceCollection
+                .AddAppOption<DatabaseOptions>(config)
+                .AddAppOption<DiscordOptions>(config)
+                .AddAppOption<LoggingOptions>(config)
+                .AddAppOption<OsuWebApiOptions>(config)
+                .AddAppOption<CacheOptions>(config)
                 .AddSingleton<IOsuWebClient, OsuWebClient>()
                 .AddSingleton<IRedisService, RedisService>()
                 .AddSingleton<PlaycountFetchJobQueue>()
@@ -97,7 +86,7 @@ namespace OSPC.Bot
                 .AddScoped<IOsuWebClient, OsuWebClient>()
                 .AddScoped<IUserSearch, UserSearch>()
                 .AddScoped<IBotCommandService, BotCommandService>();
-
+            
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
 
