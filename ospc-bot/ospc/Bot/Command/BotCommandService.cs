@@ -3,7 +3,6 @@ using MySql.Data.MySqlClient;
 using OSPC.Bot.Command.Result;
 using OSPC.Bot.Component;
 using OSPC.Bot.Context;
-using OSPC.Bot.Helper;
 using OSPC.Bot.Search.UserSearch;
 using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.Repository;
