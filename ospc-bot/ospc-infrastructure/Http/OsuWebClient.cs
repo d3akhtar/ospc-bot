@@ -32,13 +32,13 @@ namespace OSPC.Infrastructure.Http
 
         public async Task<List<BeatmapPlaycount>> GetBeatmapPlaycountsForUser(int userId, int limit = 100, int offset = 0)
         {
-            var accessToken = await getAccessToken();
+            var accessToken = await GetAccessToken();
             var uri = _baseUrl + $"users/{userId}/beatmapsets/most_played?limit={limit}&offset={offset}";
 
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var beatmapPlaycounts = await sendRequestWithAccessToken<List<BeatmapPlaycount>>(request, accessToken);
+            var beatmapPlaycounts = await SendRequestWithAccessToken<List<BeatmapPlaycount>>(request, accessToken);
             if (beatmapPlaycounts != null) {
                 foreach (var bpc in beatmapPlaycounts) bpc.UserId = userId;
             }
@@ -47,13 +47,13 @@ namespace OSPC.Infrastructure.Http
 
         public async Task<User?> FindUserWithUsername(string username)
         {
-            var accessToken = await getAccessToken();
+            var accessToken = await GetAccessToken();
             var uri = _baseUrl + $"users/@{username}";
 
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            return await sendRequestWithAccessToken<User>(request, accessToken);
+            return await SendRequestWithAccessToken<User>(request, accessToken);
         }
 
         public async Task LoadUserPlayedMaps(int userId)
@@ -100,10 +100,10 @@ namespace OSPC.Infrastructure.Http
             UserRankStatistic? stat = await _redis.GetUserRankStatisticAsync(userId);
             if (stat != null) return stat;
 
-            var accessToken = await getAccessToken();
+            var accessToken = await GetAccessToken();
             var uri = _baseUrl + $"users/{userId}";
             Console.WriteLine($"uri: {uri}");
-            var res = await sendRequestWithAccessToken(uri, accessToken);
+            var res = await SendRequestWithAccessToken(uri, accessToken);
             if (res.IsSuccessStatusCode) {
                 var json = await res.Content.ReadAsStringAsync();
                 using JsonDocument doc = JsonDocument.Parse(json);
@@ -118,7 +118,7 @@ namespace OSPC.Infrastructure.Http
         {
             if (beatmapIds.Count() == 0) return new();
 
-            var accessToken = await getAccessToken();
+            var accessToken = await GetAccessToken();
             string queryParams = "?";
             int length = beatmapIds.Count();
             int i = 0;
@@ -132,10 +132,10 @@ namespace OSPC.Infrastructure.Http
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            return (await sendRequestWithAccessToken<BeatmapListResponse>(request, accessToken))?.Beatmaps ?? [];
+            return (await SendRequestWithAccessToken<BeatmapListResponse>(request, accessToken))?.Beatmaps ?? [];
         }
 
-        private async Task<ClientCredentials> getClientCredentials()
+        private async Task<ClientCredentials> GetClientCredentials()
         {
             var uri = $"https://osu.ppy.sh/oauth/token";
 
@@ -157,11 +157,11 @@ namespace OSPC.Infrastructure.Http
             return (await res.Content.ReadFromJsonAsync<ClientCredentials>())!;
         }
 
-        private async Task<string> getAccessToken()
+        private async Task<string> GetAccessToken()
         {
             string? accessToken = await _redis.GetAccessTokenAsync();
             if (accessToken == null) {
-                var credentials = await getClientCredentials();
+                var credentials = await GetClientCredentials();
                 await _redis.SetAccessTokenAsync(credentials.AccessToken, credentials.ExpiresIn);
                 accessToken = credentials.AccessToken;
             }
@@ -169,11 +169,11 @@ namespace OSPC.Infrastructure.Http
             return accessToken;
         }
 
-        private async Task<T?> sendRequestWithAccessToken<T>(HttpRequestMessage request, string accessToken) where T : class
+        private async Task<T?> SendRequestWithAccessToken<T>(HttpRequestMessage request, string accessToken) where T : class
         {
             Console.WriteLine($"Request uri = {request.RequestUri}");
             
-            await handleRateLimits();
+            await HandleRateLimits();
 
             request.Headers.Add("Authorization", $"Bearer {accessToken}");
             if (typeof(T) == typeof(List<Beatmap>)) Console.WriteLine("sending...");
@@ -184,11 +184,11 @@ namespace OSPC.Infrastructure.Http
                 await res.Content.ReadFromJsonAsync<T>():null;
         }
 
-        private async Task<HttpResponseMessage> sendRequestWithAccessToken(string uri, string accessToken)
+        private async Task<HttpResponseMessage> SendRequestWithAccessToken(string uri, string accessToken)
         {
             Console.WriteLine($"Request uri = {uri}");
                         
-            await handleRateLimits();
+            await HandleRateLimits();
             
             HttpRequestMessage request = new(HttpMethod.Get, uri);
             request.Headers.Add("Authorization", $"Bearer {accessToken}");
@@ -196,7 +196,7 @@ namespace OSPC.Infrastructure.Http
             return await _httpClient.SendAsync(request);
         }
 
-        private async Task handleRateLimits()
+        private async Task HandleRateLimits()
         {
             requestsWithinMinute.Add(DateTime.Now);
             for (int i = requestsWithinMinute.Count - 1; i >= 0; i--){

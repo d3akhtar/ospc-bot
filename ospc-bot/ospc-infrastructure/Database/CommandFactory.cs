@@ -7,12 +7,12 @@ namespace OSPC.Infrastructure.Database
 	public static class CommandFactory
 	{
 		public static MySqlCommand CreateGetBeatmapByIdCommand(MySqlConnection conn, int beatmapId)
-			=> createQueryIdCommand("CALL GetBeatmapById(@Id)", conn, beatmapId);
+			=> CreateQueryIdCommand("CALL GetBeatmapById(@Id)", conn, beatmapId);
 
 		public static MySqlCommand CreateGetBeatmapSetByIdCommand(MySqlConnection conn, int beatmapSetId)
-			=> createQueryIdCommand("CALL GetBeatmapSetById(@Id)", conn, beatmapSetId);
+			=> CreateQueryIdCommand("CALL GetBeatmapSetById(@Id)", conn, beatmapSetId);
 
-		private static MySqlCommand createQueryIdCommand(string query, MySqlConnection conn, int id)
+		private static MySqlCommand CreateQueryIdCommand(string query, MySqlConnection conn, int id)
 		{
 			var command = new MySqlCommand(query, conn);
 			command.Parameters.AddWithValue("@Id", id);
@@ -22,12 +22,12 @@ namespace OSPC.Infrastructure.Database
 		}
 
 		public static MySqlCommand CreateGetPlaycountForBeatmapCommand(MySqlConnection conn, int userId, int beatmapId)
-			=> createBeatmapPlaycountCommand("CALL GetPlaycountForBeatmap(@UserId, @BeatmapId)", conn, userId, beatmapId);
+			=> CreateBeatmapPlaycountCommand("CALL GetPlaycountForBeatmap(@UserId, @BeatmapId)", conn, userId, beatmapId);
 
 		public static MySqlCommand CreateGetBeatmapPlaycountForUserCommand(MySqlConnection conn, int userId, int beatmapId)
-			=> createBeatmapPlaycountCommand("CALL GetBeatmapPlaycountForUser(@UserId, @BeatmapId)", conn, userId, beatmapId);
+			=> CreateBeatmapPlaycountCommand("CALL GetBeatmapPlaycountForUser(@UserId, @BeatmapId)", conn, userId, beatmapId);
 
-		private static MySqlCommand createBeatmapPlaycountCommand(string query, MySqlConnection conn, int userId, int beatmapId)
+		private static MySqlCommand CreateBeatmapPlaycountCommand(string query, MySqlConnection conn, int userId, int beatmapId)
 		{
 			var command = new MySqlCommand(query, conn);
 			command.Parameters.AddWithValue("@UserId", userId);
@@ -127,7 +127,7 @@ namespace OSPC.Infrastructure.Database
 
 		public static MySqlCommand CreateBeatmapPlaycountFilterCommand(this SearchParams searchParams, MySqlConnection conn, int userId, int pageSize = -1, int pageNumber = -1)
         {
-            (string query, bool generalQuery) = searchParams.createFilterQuery(userId, pageSize, pageNumber);
+            (string query, bool generalQuery) = searchParams.CreateFilterQuery(userId, pageSize, pageNumber);
             MySqlCommand command = new MySqlCommand(query, conn);
             if (generalQuery) command.Parameters.AddWithValue("@query", searchParams.Query);
             else {
@@ -139,7 +139,7 @@ namespace OSPC.Infrastructure.Database
             return command;
         }
 
-        private static (string, bool) createFilterQuery(this SearchParams searchParams, int userId, int pageSize, int pageNumber) 
+        private static (string, bool) CreateFilterQuery(this SearchParams searchParams, int userId, int pageSize, int pageNumber) 
         {
             bool countQuery = pageSize == -1 || pageNumber == -1;
             bool generalQuery = string.IsNullOrEmpty(searchParams.Artist) && string.IsNullOrEmpty(searchParams.Title);

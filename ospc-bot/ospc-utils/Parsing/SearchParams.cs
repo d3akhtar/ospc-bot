@@ -19,11 +19,11 @@ namespace OSPC.Utils
         public static void ConfigureBindings()
         {
             RegexEvaluator rb = new();
-            rb.AddFlag(name: getMemberName(s => s.Username), RegexFlagMatchOptions.Word | RegexFlagMatchOptions.Numbers | RegexFlagMatchOptions.Multi, []);
-            rb.AddFlag(name: getMemberName(s => s.Exact), RegexFlagMatchOptions.NoInput, ["-e", "--exact"]);
-            rb.AddFlag(name: getMemberName(s => s.Query), RegexFlagMatchOptions.Word | RegexFlagMatchOptions.Numbers | RegexFlagMatchOptions.Multi, "-q", "--query");
-            rb.AddFlag(name: getMemberName(s => s.Artist), RegexFlagMatchOptions.Word | RegexFlagMatchOptions.Numbers | RegexFlagMatchOptions.Multi, "-a", "--artist");
-            rb.AddFlag(name: getMemberName(s => s.Title), RegexFlagMatchOptions.Word | RegexFlagMatchOptions.Numbers | RegexFlagMatchOptions.Multi, "-t", "--title");
+            rb.AddFlag(name: GetMemberName(s => s.Username), RegexFlagMatchOptions.Word | RegexFlagMatchOptions.Numbers | RegexFlagMatchOptions.Multi, []);
+            rb.AddFlag(name: GetMemberName(s => s.Exact), RegexFlagMatchOptions.NoInput, ["-e", "--exact"]);
+            rb.AddFlag(name: GetMemberName(s => s.Query), RegexFlagMatchOptions.Word | RegexFlagMatchOptions.Numbers | RegexFlagMatchOptions.Multi, "-q", "--query");
+            rb.AddFlag(name: GetMemberName(s => s.Artist), RegexFlagMatchOptions.Word | RegexFlagMatchOptions.Numbers | RegexFlagMatchOptions.Multi, "-a", "--artist");
+            rb.AddFlag(name: GetMemberName(s => s.Title), RegexFlagMatchOptions.Word | RegexFlagMatchOptions.Numbers | RegexFlagMatchOptions.Multi, "-t", "--title");
             
             BindPropertyToRegexGroup(s => s.Username);
             BindPropertyToRegexGroup(s => s.Exact);
@@ -75,13 +75,13 @@ namespace OSPC.Utils
             (bool success, BeatmapFilter? beatmapFilter, input) = BeatmapFilter.ParseBeatmapFilter(input);
             if (!success) return null;
             
-            (success, string query, string artist, string title, bool exact, input) = processFlags(input);
+            (success, string query, string artist, string title, bool exact, input) = ProcessFlags(input);
             if (!success) return null;
             
-            (success, ComparisonFilter count, input) = getPlaycountComparison(input);
+            (success, ComparisonFilter count, input) = GetPlaycountComparison(input);
             if (!success) return null;
             
-            (success, string username, input) = getUsername(input);
+            (success, string username, input) = GetUsername(input);
             if (!success) return null;
             
             return new SearchParams {
@@ -95,7 +95,7 @@ namespace OSPC.Utils
             };
         }
         
-        private static (bool success, string username, string cleaned) getUsername(string input)
+        private static (bool success, string username, string cleaned) GetUsername(string input)
         {
             string username = "", cleaned = input;
             var matches = RegexPatterns.UsernameRegex.Matches(input);
@@ -107,7 +107,7 @@ namespace OSPC.Utils
             return (true, username, cleaned);
         }
         
-        private static (bool success, string query, string artist, string title, bool exact, string cleaned) processFlags(string input)
+        private static (bool success, string query, string artist, string title, bool exact, string cleaned) ProcessFlags(string input)
         {
             string query = "", artist = "", title = "", cleaned = input; bool exact = false;
             
@@ -144,7 +144,7 @@ namespace OSPC.Utils
             return (true, query, artist, title, exact, cleaned);
         }
         
-        private static (bool success, ComparisonFilter? count, string cleaned) getPlaycountComparison(string input)
+        private static (bool success, ComparisonFilter? count, string cleaned) GetPlaycountComparison(string input)
         {
             string cleaned = input;
             var matches = RegexPatterns.PlaycountComparisonRegex.Matches(input);
@@ -153,7 +153,7 @@ namespace OSPC.Utils
             return (success, filter, cleaned);
         }
 
-        private static string getMemberName<T>(Expression<Func<SearchParams,T>> exp)
+        private static string GetMemberName<T>(Expression<Func<SearchParams,T>> exp)
         {
             return ExpUtils.GetMemberName<SearchParams,T>(exp);
         }

@@ -23,7 +23,7 @@ namespace OSPC.Bot.Component
             BotClient.Instance.LastButtonIdClickedForEmbeded.Add(message.Id, ButtonType.Unknown);
             if (!ButtonDeleteTimers.ContainsKey(message.Id))
                 ButtonDeleteTimers.Add(message.Id, new Timer(
-                    async _ => await deleteButtons(message)
+                    async _ => await DeleteButtons(message)
                 ));
             ResetTimer(message);
         }
@@ -42,7 +42,7 @@ namespace OSPC.Bot.Component
             }
         }
 
-        private async static Task deleteButtons(IUserMessage message)
+        private async static Task DeleteButtons(IUserMessage message)
         {
             Console.WriteLine("Deleting...");
             await message.ModifyAsync(
@@ -132,7 +132,7 @@ namespace OSPC.Bot.Component
             if (ActiveEmbeds.ContainsKey(id)){
                 PlaycountEmbedContext context = ActiveEmbeds[id];
                 int pageNumber = BotClient.Instance.CurrentPageForEmbed[context.Message.Id];
-                List<BeatmapPlaycount> mostPlayed = await queryPlaycountBasedOffEmbedContext(
+                List<BeatmapPlaycount> mostPlayed = await QueryPlaycountBasedOffEmbedContext(
                     osuWebClient, beatmapRepo, context, pageNumber
                 );
                 var stats = await osuWebClient.GetUserRankStatistics(context.User.Id);
@@ -155,22 +155,22 @@ namespace OSPC.Bot.Component
                     .WithName("Command list for ospc:")
                     .WithIconUrl("https://i.imgur.com/7Gu9beA.png")
                 )
-                .WithDescription($"**Settings** - {convertToInline("load", "link-profile")}\n**Osu** - {convertToInline("most-played", "playcount", "search")}")
+                .WithDescription($"**Settings** - {ConvertToInline("load", "link-profile")}\n**Osu** - {ConvertToInline("most-played", "playcount", "search")}")
                 .Build();
         
         public static Embed BuildHelpEmbedForCommand(string command)
         {
             switch (command){
-                case "load": return buildLoadCommandHelpEmbed();
-                case "link-profile": return buildLinkProfileCommandHelpEmbed();
-                case "most-played": case "mp": return buildMostPlayedCommandHelpEmbed();
-                case "playcount": case "pc": return buildPlaycountCommandHelpEmbed();
-                case "search": return buildSearchCommandHelpEmbed();
+                case "load": return BuildLoadCommandHelpEmbed();
+                case "link-profile": return BuildLinkProfileCommandHelpEmbed();
+                case "most-played": case "mp": return BuildMostPlayedCommandHelpEmbed();
+                case "playcount": case "pc": return BuildPlaycountCommandHelpEmbed();
+                case "search": return BuildSearchCommandHelpEmbed();
                 default: return BuildErrorEmbed($"Command: {command} doesn't exist!");
             }
         }
 
-        private static Embed buildLoadCommandHelpEmbed()
+        private static Embed BuildLoadCommandHelpEmbed()
             => new EmbedBuilder()
                 .WithColor(Color.Teal)
                 .WithTitle("load")
@@ -187,7 +187,7 @@ namespace OSPC.Bot.Component
                     ")
                 .Build();
 
-        private static Embed buildLinkProfileCommandHelpEmbed()
+        private static Embed BuildLinkProfileCommandHelpEmbed()
             => new EmbedBuilder()
                 .WithColor(Color.Teal)
                 .WithTitle("link-profile")
@@ -202,7 +202,7 @@ namespace OSPC.Bot.Component
                     ")
                 .Build();
 
-        private static Embed buildMostPlayedCommandHelpEmbed()
+        private static Embed BuildMostPlayedCommandHelpEmbed()
              => new EmbedBuilder()
                 .WithColor(Color.Teal)
                 .WithTitle("most-played")
@@ -219,7 +219,7 @@ namespace OSPC.Bot.Component
                     ")
                 .Build();
 
-        private static Embed buildPlaycountCommandHelpEmbed()
+        private static Embed BuildPlaycountCommandHelpEmbed()
             => new EmbedBuilder()
                 .WithColor(Color.Teal)
                 .WithTitle("playcount")
@@ -247,7 +247,7 @@ namespace OSPC.Bot.Component
                     ")
                 .Build();
 
-        private static Embed buildSearchCommandHelpEmbed()
+        private static Embed BuildSearchCommandHelpEmbed()
             => new EmbedBuilder()
                 .WithColor(Color.Teal)
                 .WithTitle("search")
@@ -300,10 +300,10 @@ namespace OSPC.Bot.Component
                     ")
                 .Build();
 
-        private static string convertToInline(params string[] words) 
+        private static string ConvertToInline(params string[] words) 
             => words.Aggregate("", (acc, curr) => acc += $"`{curr}` ");
 
-        private static async Task<List<BeatmapPlaycount>> queryPlaycountBasedOffEmbedContext(
+        private static async Task<List<BeatmapPlaycount>> QueryPlaycountBasedOffEmbedContext(
             IOsuWebClient osuWebClient,
             IBeatmapRepository beatmapRepo,
             PlaycountEmbedContext context, 

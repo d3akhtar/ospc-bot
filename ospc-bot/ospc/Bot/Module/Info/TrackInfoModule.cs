@@ -18,7 +18,7 @@ namespace OSPC.Bot.Module.Info
 
         public TrackInfoModule(IBotCommandService botCmds, IBeatmapRepository beatmapRepo, IOsuWebClient osuWebClient)
         {
-            BotClient.Instance.PageForEmbedUpdated += pageForEmbedUpdated;
+            BotClient.Instance.PageForEmbedUpdated += PageForEmbedUpdated;
             _botCmds = botCmds;
             _beatmapRepo = beatmapRepo;
             _osuWebClient = osuWebClient;
@@ -70,7 +70,7 @@ namespace OSPC.Bot.Module.Info
             await ReplyBotCommandResultAsync(await _botCmds.Search(Context.GetOsuContext(), searchParams));
         }
 
-        private async Task pageForEmbedUpdated(ulong id)
+        private async Task PageForEmbedUpdated(ulong id)
             => await Embeded.PageForEmbedUpdated(_osuWebClient, _beatmapRepo, id);
 
         [Command("most-played")]

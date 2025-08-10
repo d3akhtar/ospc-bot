@@ -27,16 +27,16 @@ namespace OSPC.Utils
         {
             if (filter == null) return "";
             else if (filter is SingleFilter s)
-                return $"AND {table}.{attribute}{createExpressionForSingleFilter(s)} ";
+                return $"AND {table}.{attribute}{CreateExpressionForSingleFilter(s)} ";
             else if (filter is BetweenFilter b)
                 return $@"
-                            AND {table}.{attribute}{createExpressionForSingleFilter(b.Min)} 
-                            AND {table}.{attribute}{createExpressionForSingleFilter(b.Max)}
+                            AND {table}.{attribute}{CreateExpressionForSingleFilter(b.Min)} 
+                            AND {table}.{attribute}{CreateExpressionForSingleFilter(b.Max)}
                         ";
             else return "";
         }
 
-        private static string createExpressionForSingleFilter(SingleFilter s)
+        private static string CreateExpressionForSingleFilter(SingleFilter s)
             => $"{ConvertToString(s.Comparison)}{s.Value}";
 
         public static Comparison Convert(string input)

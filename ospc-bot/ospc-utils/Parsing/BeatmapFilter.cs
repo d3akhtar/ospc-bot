@@ -26,31 +26,31 @@ namespace OSPC.Utils
         };
 
         public string GetClause()
-            => getClauseForAttribute(this, b => b.CircleSize!) +
-               getClauseForAttribute(this, b => b.BPM!) + 
-               getClauseForAttribute(this, b => b.Length!) +
-               getClauseForAttribute(this, b => b.HpDrain!) + 
-               getClauseForAttribute(this, b => b.OD!) + 
-               getClauseForAttribute(this, b => b.AR!) + 
-               getClauseForAttribute(this, b => b.DifficultyRating!);
+            => GetClauseForAttribute(this, b => b.CircleSize!) +
+               GetClauseForAttribute(this, b => b.BPM!) + 
+               GetClauseForAttribute(this, b => b.Length!) +
+               GetClauseForAttribute(this, b => b.HpDrain!) + 
+               GetClauseForAttribute(this, b => b.OD!) + 
+               GetClauseForAttribute(this, b => b.AR!) + 
+               GetClauseForAttribute(this, b => b.DifficultyRating!);
 
         public static (bool success, BeatmapFilter? filter, string cleaned) ParseBeatmapFilter(string input)
         {
             string cleaned = input;
             
-            (bool success, ComparisonFilter? cs, cleaned) = getBeatmapAttributeFilter(b => b.CircleSize!, cleaned);
+            (bool success, ComparisonFilter? cs, cleaned) = GetBeatmapAttributeFilter(b => b.CircleSize!, cleaned);
             if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? bpm, cleaned) = getBeatmapAttributeFilter(b => b.BPM!, cleaned);
+            (success, ComparisonFilter? bpm, cleaned) = GetBeatmapAttributeFilter(b => b.BPM!, cleaned);
             if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? length, cleaned) = getBeatmapAttributeFilter(b => b.Length!, cleaned);
+            (success, ComparisonFilter? length, cleaned) = GetBeatmapAttributeFilter(b => b.Length!, cleaned);
             if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? hpDrain, cleaned) = getBeatmapAttributeFilter(b => b.HpDrain!, cleaned);
+            (success, ComparisonFilter? hpDrain, cleaned) = GetBeatmapAttributeFilter(b => b.HpDrain!, cleaned);
             if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? od, cleaned) = getBeatmapAttributeFilter(b => b.OD!, cleaned);
+            (success, ComparisonFilter? od, cleaned) = GetBeatmapAttributeFilter(b => b.OD!, cleaned);
             if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? ar, cleaned) = getBeatmapAttributeFilter(b => b.AR!, cleaned);
+            (success, ComparisonFilter? ar, cleaned) = GetBeatmapAttributeFilter(b => b.AR!, cleaned);
             if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? difficultyRating, cleaned) = getBeatmapAttributeFilter(b => b.DifficultyRating!, cleaned);
+            (success, ComparisonFilter? difficultyRating, cleaned) = GetBeatmapAttributeFilter(b => b.DifficultyRating!, cleaned);
             if (!success) return (false, null, cleaned);
             
             BeatmapFilter filter = new()
@@ -69,13 +69,13 @@ namespace OSPC.Utils
             return (success, filter, cleaned);
         }
 
-        private static string getClauseForAttribute(BeatmapFilter beatmapFilter, Expression<Func<BeatmapFilter,ComparisonFilter>> exp)
+        private static string GetClauseForAttribute(BeatmapFilter beatmapFilter, Expression<Func<BeatmapFilter,ComparisonFilter>> exp)
             => ComparisonConverter.CreateComparisonClause(
                 exp.Compile().Invoke(beatmapFilter), "Beatmaps", 
                 (exp.Body as MemberExpression)!.Member.Name
             );
         
-        private static (bool success, ComparisonFilter? filter, string cleaned) getBeatmapAttributeFilter(Expression<Func<BeatmapFilter,ComparisonFilter>> exp, string input)
+        private static (bool success, ComparisonFilter? filter, string cleaned) GetBeatmapAttributeFilter(Expression<Func<BeatmapFilter,ComparisonFilter>> exp, string input)
         {
             string abbreviation = GetFilterAbbreviation(exp), cleaned = input;
             Regex filterRegex = new Regex(RegexPatterns.BeatmapFilterRegexTemplate.Replace("{abbreviation}", abbreviation));

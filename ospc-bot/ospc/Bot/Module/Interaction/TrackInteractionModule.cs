@@ -20,11 +20,11 @@ namespace OSPC.Bot.Module.Interaction
         {
             _beatmapRepo = beatmapRepo;
             _osuWebClient = osuWebClient;
-            BotClient.Instance.PageForEmbedUpdated += pageForEmbedUpdated;
+            BotClient.Instance.PageForEmbedUpdated += PageForEmbedUpdated;
             _botCmds = botCmds;
         }
 
-        private async Task pageForEmbedUpdated(ulong id)
+        private async Task PageForEmbedUpdated(ulong id)
             => await Embeded.PageForEmbedUpdated(_osuWebClient, _beatmapRepo, id);
 
         [SlashCommand("most-played", "Get most played beatmaps for a user")]

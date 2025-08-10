@@ -43,13 +43,13 @@ namespace OSPC.Bot
 
             _client = new DiscordSocketClient(config);
             
-            _client.Ready += onClientReady;
-            _client.InteractionCreated += onInteraction;
-            _client.MessageCommandExecuted += onInteraction;
-            _client.UserCommandExecuted += onInteraction;
-            _client.ButtonExecuted += onButtonClick;
-            _client.ModalSubmitted += onModalSubmit;
-            _client.MessageReceived += onMsgReceived;
+            _client.Ready += OnClientReady;
+            _client.InteractionCreated += OnInteraction;
+            _client.MessageCommandExecuted += OnInteraction;
+            _client.UserCommandExecuted += OnInteraction;
+            _client.ButtonExecuted += OnButtonClick;
+            _client.ModalSubmitted += OnModalSubmit;
+            _client.MessageReceived += OnMsgReceived;
 
             _interactService = new InteractionService(_client.Rest);
             _cmds = new CommandService();
@@ -73,7 +73,7 @@ namespace OSPC.Bot
                 .BuildServiceProvider();
         }
 
-        private async Task onModalSubmit(SocketModal modal)
+        private async Task OnModalSubmit(SocketModal modal)
         {
             ulong msgId = modal.Message.Id;
             Console.WriteLine($"msgId: {msgId}");
@@ -108,11 +108,11 @@ namespace OSPC.Bot
             }
         }
 
-        private async Task onMsgReceived(SocketMessage message)
+        private async Task OnMsgReceived(SocketMessage message)
         {
             if (message.Author.IsBot) return;
 
-            _ = Task.Run(async () => await handleBeatmapLinks(message));
+            _ = Task.Run(async () => await HandleBeatmapLinks(message));
 
             int argPos = 0;
             var userMessage = message as SocketUserMessage;
@@ -125,7 +125,7 @@ namespace OSPC.Bot
             }
         }
 
-        private async Task handleBeatmapLinks(SocketMessage message)
+        private async Task HandleBeatmapLinks(SocketMessage message)
         {
             var match = RegexPatterns.OsuBeatmapLinkRegex.Match(message.Content);
             if (match.Success){
@@ -138,7 +138,7 @@ namespace OSPC.Bot
             }
         }
 
-        private async Task onButtonClick(SocketMessageComponent component)
+        private async Task OnButtonClick(SocketMessageComponent component)
         {
             ulong msgId = component.Message.Id;
             Console.WriteLine($"msgId: {msgId}");
@@ -193,7 +193,7 @@ namespace OSPC.Bot
             }
         }
 
-        private async Task onClientReady()
+        private async Task OnClientReady()
         {
             ulong guildId = 845680976243982356;
 
@@ -216,7 +216,7 @@ namespace OSPC.Bot
             await Task.Delay(-1); // Block
         }
 
-        private async Task onInteraction(SocketInteraction interaction)
+        private async Task OnInteraction(SocketInteraction interaction)
         {
             var scope = _serviceProvider.CreateScope();
             var ctx = new SocketInteractionContext(_client, interaction);
