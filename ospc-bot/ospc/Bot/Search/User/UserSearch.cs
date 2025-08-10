@@ -19,10 +19,12 @@ namespace OSPC.Bot.Search.UserSearch
         public async Task<User?> SearchUser(string username, ChannelOsuContext? channelOsuContext = null)
         {
 			List<Task<User?>> userSearchTasks = new();
-			if (channelOsuContext != null)
-				userSearchTasks.Add(_userRepo.GetUserWithDiscordId(channelOsuContext.DiscordUserId));
 
-			userSearchTasks.Add(_userRepo.GetUserByUsername(username));
+			if (channelOsuContext != null && username == User.Unspecified)
+				userSearchTasks.Add(_userRepo.GetUserWithDiscordId(channelOsuContext.DiscordUserId));
+			else
+				userSearchTasks.Add(_userRepo.GetUserByUsername(username));
+
 			userSearchTasks.Add(_osuWebClient.FindUserWithUsername(username));
 
 			foreach (var task in userSearchTasks) {
