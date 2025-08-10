@@ -1,5 +1,7 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 using OSPC.Domain.Model;
+using OSPC.Domain.Options;
 using OSPC.Utils;
 using StackExchange.Redis;
 
@@ -7,12 +9,14 @@ namespace OSPC.Infrastructure.Caching
 {
     public class RedisService : IRedisService
     {
+        private readonly IOptions<CacheOptions> _cacheOptions;
         private readonly ConnectionMultiplexer _connection;
         private readonly IDatabase _cache;
 
-        public RedisService(Settings settings)
+        public RedisService(IOptions<CacheOptions> cacheOptions)
         {
-            _connection = ConnectionMultiplexer.Connect(settings.Data.RedisConnection);
+            _cacheOptions = cacheOptions;
+            _connection = ConnectionMultiplexer.Connect(cacheOptions.Value.RedisConnection);
             _cache = _connection.GetDatabase();
         }
 

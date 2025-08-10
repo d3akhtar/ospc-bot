@@ -1,39 +1,37 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 using OSPC.Domain.Model;
+using OSPC.Domain.Options;
 using OSPC.Domain.Model.DTO;
 using OSPC.Infrastructure.Caching;
 using OSPC.Infrastructure.Database.Repository;
-using OSPC.Utils;
 
 namespace OSPC.Infrastructure.Http
 {
     public class OsuWebClient : IOsuWebClient
     {
         private HttpClient _httpClient;
-        private readonly string _baseUrl;
-        private readonly int _clientId;
-        private readonly string _clientSecret;
+        private readonly IOptions<OsuWebApiOptions> _osuWebApiOptions;
         private readonly IRedisService _redis;
         private readonly IBeatmapRepository _beatmapRepo;
         private readonly int requestsPerMinute = 60;
         private List<DateTime> requestsWithinMinute = new();
         
-        public OsuWebClient(IRedisService redis, IBeatmapRepository beatmapRepo, Settings settings)
+        public OsuWebClient(IRedisService redis, IBeatmapRepository beatmapRepo, IOptions<OsuWebApiOptions> osuWebApiOptions)
         {
-            _baseUrl = settings.OsuWebApi.BaseUrl;
-            _httpClient = new HttpClient();
-            _clientId = settings.OsuWebApi.ClientId;
-            _clientSecret = settings.OsuWebApi.ClientSecret;
+            _osuWebApiOptions = osuWebApiOptions;
             _redis = redis;
             _beatmapRepo = beatmapRepo;
+
+            _httpClient = new HttpClient();
         }
 
         public async Task<List<BeatmapPlaycount>> GetBeatmapPlaycountsForUser(int userId, int limit = 100, int offset = 0)
         {
             var accessToken = await GetAccessToken();
-            var uri = _baseUrl + $"users/{userId}/beatmapsets/most_played?limit={limit}&offset={offset}";
+            var uri = _osuWebApiOptions.Value.BaseUrl + $"users/{userId}/beatmapsets/most_played?limit={limit}&offset={offset}";
 
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -48,7 +46,7 @@ namespace OSPC.Infrastructure.Http
         public async Task<User?> FindUserWithUsername(string username)
         {
             var accessToken = await GetAccessToken();
-            var uri = _baseUrl + $"users/@{username}";
+            var uri = _osuWebApiOptions.Value.BaseUrl + $"users/@{username}";
 
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -101,7 +99,7 @@ namespace OSPC.Infrastructure.Http
             if (stat != null) return stat;
 
             var accessToken = await GetAccessToken();
-            var uri = _baseUrl + $"users/{userId}";
+            var uri = _osuWebApiOptions.Value.BaseUrl + $"users/{userId}";
             Console.WriteLine($"uri: {uri}");
             var res = await SendRequestWithAccessToken(uri, accessToken);
             if (res.IsSuccessStatusCode) {
@@ -127,7 +125,7 @@ namespace OSPC.Infrastructure.Http
                 i++;
             }
 
-            var uri = _baseUrl + "beatmaps" + queryParams;
+            var uri = _osuWebApiOptions.Value.BaseUrl + "beatmaps" + queryParams;
 
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -143,8 +141,8 @@ namespace OSPC.Infrastructure.Http
             {
                 Content = new FormUrlEncodedContent(new[]
                 {
-                    new KeyValuePair<string, string>("client_id", _clientId.ToString()),
-                    new KeyValuePair<string, string>("client_secret", _clientSecret),
+                    new KeyValuePair<string, string>("client_id", _osuWebApiOptions.Value.ClientId.ToString()),
+                    new KeyValuePair<string, string>("client_secret", _osuWebApiOptions.Value.ClientSecret),
                     new KeyValuePair<string, string>("grant_type", "client_credentials"),
                     new KeyValuePair<string, string>("scope", "public")
                 })

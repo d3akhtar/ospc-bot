@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 using MySql.Data.MySqlClient;
+using OSPC.Domain.Options;
 using OSPC.Utils;
 
 namespace OSPC.Bot.Logging
@@ -10,13 +11,13 @@ namespace OSPC.Bot.Logging
     public class LoggingService
     {
         private readonly LogSeverity _level;
-        private readonly LoggingSettings _settings;
+        private readonly LoggingOptions _options;
         private readonly string _basePath;
         public LoggingService(
             DiscordSocketClient client, 
             CommandService command, 
             InteractionService interactionService,
-            LoggingSettings settings)
+            LoggingOptions options)
         {
             _basePath = Directory.GetCurrentDirectory();
 
@@ -24,7 +25,7 @@ namespace OSPC.Bot.Logging
             command.Log += LogAsync;
             interactionService.Log += LogAsync;
 
-            _level = settings.LogLevel switch {
+            _level = options.LogLevel switch {
                 LogLevel.Critical => LogSeverity.Critical,
                 LogLevel.Error => LogSeverity.Error,
                 LogLevel.Warning => LogSeverity.Warning,
@@ -32,10 +33,7 @@ namespace OSPC.Bot.Logging
                 _ => LogSeverity.Debug
             };
 
-            _settings = settings;
-
-            if (!Directory.Exists(Path.Join(_basePath, _settings.LogDirectory))) 
-                Directory.CreateDirectory(Path.Join(_basePath, _settings.LogDirectory));
+            _options = options;
         }
 
         // TODO: Use serilog, log specific exceptions like MySQLException here
@@ -56,9 +54,9 @@ namespace OSPC.Bot.Logging
 
             Console.WriteLine(output);
 
-            if (_settings.LogToFile) 
+            if (_options.LogToFile) 
                 File.AppendAllText(
-                    Path.Join(_basePath, _settings.LogFilePath), 
+                    Path.Join(_basePath, _options.LogFilePath), 
                     output + "\n");
 
             return Task.CompletedTask;

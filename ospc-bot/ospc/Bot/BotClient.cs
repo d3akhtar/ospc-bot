@@ -5,7 +5,9 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.Net;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using OSPC.Bot.Command;
 using OSPC.Bot.Component;
 using OSPC.Bot.Logging;
@@ -15,6 +17,7 @@ using OSPC.Infrastructure.Database;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
 using OSPC.Infrastructure.Job;
+using OSPC.Domain.Options;
 using OSPC.Utils;
 
 namespace OSPC.Bot
@@ -26,7 +29,6 @@ namespace OSPC.Bot
         private readonly CommandService _cmds;
         private readonly InteractionService _interactService;
         private readonly IServiceProvider _serviceProvider;
-        private readonly string _token;
 
         public event Func<ulong,Task>? PageForEmbedUpdated;
         public Dictionary<ulong, int> CurrentPageForEmbed { get; set; } = new();
@@ -36,12 +38,16 @@ namespace OSPC.Bot
         {
             Instance = this;
             
-            DiscordSocketConfig config = new DiscordSocketConfig
+            DiscordSocketConfig discordSocketConfig = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
             };
 
-            _client = new DiscordSocketClient(config);
+            IConfiguration config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            _client = new DiscordSocketClient(discordSocketConfig);
             
             _client.Ready += OnClientReady;
             _client.InteractionCreated += OnInteraction;
@@ -54,13 +60,34 @@ namespace OSPC.Bot
             _interactService = new InteractionService(_client.Rest);
             _cmds = new CommandService();
 
-            Settings settings = Settings.LoadFromFile("../settings.json");
-            _token = settings.Token;
+            var serviceCollection = new ServiceCollection();
 
-            new LoggingService(_client, _cmds, _interactService, settings.Logging);
+            serviceCollection
+                .AddOptions<DatabaseOptions>()
+                .Bind(config.GetSection(DatabaseOptions.Name))
+                .ValidateDataAnnotations();
 
-            _serviceProvider = new ServiceCollection()
-                .AddSingleton(settings)
+            serviceCollection
+                .AddOptions<DiscordOptions>()
+                .Bind(config.GetSection(DiscordOptions.Name))
+                .ValidateDataAnnotations();
+
+            serviceCollection
+                .AddOptions<LoggingOptions>()
+                .Bind(config.GetSection(LoggingOptions.Name))
+                .ValidateDataAnnotations();
+
+            serviceCollection
+                .AddOptions<OsuWebApiOptions>()
+                .Bind(config.GetSection(OsuWebApiOptions.Name))
+                .ValidateDataAnnotations();
+
+            serviceCollection
+                .AddOptions<CacheOptions>()
+                .Bind(config.GetSection(CacheOptions.Name))
+                .ValidateDataAnnotations();
+
+            serviceCollection
                 .AddSingleton<IOsuWebClient, OsuWebClient>()
                 .AddSingleton<IRedisService, RedisService>()
                 .AddSingleton<PlaycountFetchJobQueue>()
@@ -69,8 +96,9 @@ namespace OSPC.Bot
                 .AddScoped<IBeatmapRepository, BeatmapRepository>()
                 .AddScoped<IOsuWebClient, OsuWebClient>()
                 .AddScoped<IUserSearch, UserSearch>()
-                .AddScoped<IBotCommandService, BotCommandService>()
-                .BuildServiceProvider();
+                .AddScoped<IBotCommandService, BotCommandService>();
+
+            _serviceProvider = serviceCollection.BuildServiceProvider();
         }
 
         private async Task OnModalSubmit(SocketModal modal)
@@ -210,10 +238,18 @@ namespace OSPC.Bot
 
         public async Task StartAsync()
         {
-            await _client.LoginAsync(TokenType.Bot, _token);
-            await _client.StartAsync();
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var discordOptions = scope.ServiceProvider.GetRequiredService<IOptions<DiscordOptions>>();
+                var loggingOptions = scope.ServiceProvider.GetRequiredService<IOptions<LoggingOptions>>();
 
-            await Task.Delay(-1); // Block
+                new LoggingService(_client, _cmds, _interactService, loggingOptions.Value);
+                
+                await _client.LoginAsync(TokenType.Bot, discordOptions.Value.Token);
+                await _client.StartAsync();
+
+                await Task.Delay(-1); // Block               
+            }
         }
 
         private async Task OnInteraction(SocketInteraction interaction)
