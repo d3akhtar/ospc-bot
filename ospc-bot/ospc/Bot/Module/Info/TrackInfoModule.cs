@@ -35,7 +35,10 @@ namespace OSPC.Bot.Module.Info
         [Command("pc")]
         [Summary("Get the playcount on a beatmap for a user")]
         public async Task GetPlaycount()
-            => await ReplyAsync(embed: (await _botCmds.GetPlaycount(string.Empty, -1, Context.GetOsuContext())).Embed);
+        {
+            var result = await _botCmds.GetPlaycount(Context.GetOsuContext(), string.Empty, -1);
+            await ReplyAsync(embed: result.Embed);
+        }
 
         [Command("pc")]
         [Summary("Get the playcount on a beatmap for a user")]
@@ -51,18 +54,25 @@ namespace OSPC.Bot.Module.Info
                 return;
             }
 
-            await ReplyAsync(embed: await _botCmds.GetPlaycount(username, beatmapId, Context.GetOsuContext()));
+            var result = await _botCmds.GetPlaycount(Context.GetOsuContext(), username, beatmapId);
+            await ReplyAsync(embed: result.Embed);
         }
 
         [Command("pc")]
         [Summary("Get the playcount on a beatmap for a user")]
         public async Task GetPlaycount(string username, int beatmapId)
-            => await ReplyAsync(embed: await _botCmds.GetPlaycount(username, beatmapId, Context.GetOsuContext()));
+        {
+            var result = await _botCmds.GetPlaycount(Context.GetOsuContext(), username, beatmapId);
+            await ReplyAsync(embed: result.Embed);
+        }
 
         [Command("pc")]
         [Summary("Get the playcount on a beatmap for a user")]
         public async Task GetPlaycount(int beatmapId)
-            => await ReplyAsync(embed: await _botCmds.GetPlaycount(string.Empty, beatmapId, Context.GetOsuContext()));
+        {
+            var result = await _botCmds.GetPlaycount(Context.GetOsuContext(), string.Empty, beatmapId);
+            await ReplyAsync(embed: result.Embed);
+        }
 
         [Command("search")]
         [Summary("Search for beatmaps in most-played")]
@@ -74,20 +84,20 @@ namespace OSPC.Bot.Module.Info
                 return;
             }
 
-            (Embed embed, MessageComponent? components, PlaycountEmbedContext embedContext) 
-                = await _botCmds.Search(searchParams, Context.GetOsuContext());
+                
+            var result = await _botCmds.Search(Context.GetOsuContext(), searchParams);
 
-            if (components == null) {
-                await ReplyAsync(embed: embed);
+            if (!result.Successful) {
+                await ReplyAsync(embed: result.Embed);
                 return;
             }
 
-            embedContext.Message = await ReplyAsync (
-                embed: embed,
-                components: components
+            result.Context!.Message = await ReplyAsync (
+                embed: result.Embed,
+                components: result.Components
             );
 
-            Embeded.CreatePlaycountListEmbed(embedContext);
+            Embeded.CreatePlaycountListEmbed(result.Context);
         }
 
         private async Task pageForEmbedUpdated(ulong id)
@@ -96,18 +106,18 @@ namespace OSPC.Bot.Module.Info
         [Command("most-played")]
         public async Task MostPlayed(string username = "")
         {
-            (Embed embed, MessageComponent? buttons, PlaycountEmbedContext embedCtx) = await _botCmds.GetMostPlayed(username, Context.GetOsuContext());
-            if (buttons == null) {
-                await ReplyAsync(embed: embed);
+            var result = await _botCmds.GetMostPlayed(Context.GetOsuContext(), username);
+            if (!result.Successful) {
+                await ReplyAsync(embed: result.Embed);
                 return;
             }
 
-            embedCtx.Message = await ReplyAsync (
-                embed: embed,
-                components: buttons
+            result.Context!.Message = await ReplyAsync (
+                embed: result.Embed,
+                components: result.Components
             );
 
-            Embeded.CreatePlaycountListEmbed(embedCtx);
+            Embeded.CreatePlaycountListEmbed(result.Context);
         }
     }
 }

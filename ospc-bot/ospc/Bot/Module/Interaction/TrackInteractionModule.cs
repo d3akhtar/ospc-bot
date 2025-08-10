@@ -30,25 +30,28 @@ namespace OSPC.Bot.Module.Interaction
         public async Task GetMostPlayed(string username)
         {
             await DeferAsync();
-            (Embed embed, MessageComponent? buttons, PlaycountEmbedContext? embedCtx) = await _botCmds.GetMostPlayed(username, Context.GetOsuContext());
-            if (buttons == null || embedCtx == null) {
-                await ReplyAsync(embed: embed);
+            var result = await _botCmds.GetMostPlayed(Context.GetOsuContext(), username);
+            if (!result.Successful) {
+                await ReplyAsync(embed: result.Embed);
                 return;
             }
 
-            embedCtx.Message = await ReplyAsync (
-                embed: embed,
-                components: buttons
+            result.Context!.Message = await ReplyAsync (
+                embed: result.Embed,
+                components: result.Components
             );
 
-            Embeded.CreatePlaycountListEmbed(embedCtx);
+            Embeded.CreatePlaycountListEmbed(result.Context);
 
             await DeleteOriginalResponseAsync();
         }
 
         [SlashCommand("playcount", "Get the playcount on a beatmap for a user")]
         public async Task GetPlaycount(string username = "", int beatmapId = -1)
-            => await RespondAsync(embed: await _botCmds.GetPlaycount(username, beatmapId, Context.GetOsuContext()));
+        {
+            var result = await _botCmds.GetPlaycount(Context.GetOsuContext(), username, beatmapId);
+            await RespondAsync(embed: result.Embed);
+        }
 
         [SlashCommand("search", "Search for beatmaps in most played")]
         public async Task Search(
@@ -82,20 +85,19 @@ namespace OSPC.Bot.Module.Interaction
                      BeatmapFilter = beatmapFilter!
                 };
 
-                (Embed embed, MessageComponent? components, PlaycountEmbedContext? embedContext) 
-                    = await _botCmds.Search(searchParams, Context.GetOsuContext());
+                var result = await _botCmds.Search(Context.GetOsuContext(), searchParams);
 
-                if (components == null || embedContext == null) {
-                    await RespondAsync(embed: embed);
+                if (!result.Successful) {
+                    await RespondAsync(embed: result.Embed);
                     return;
                 }
 
-                embedContext.Message = await ReplyAsync (
-                    embed: embed,
-                    components: components
+                result.Context!.Message = await ReplyAsync (
+                    embed: result.Embed,
+                    components: result.Components
                 );
 
-                Embeded.CreatePlaycountListEmbed(embedContext);
+                Embeded.CreatePlaycountListEmbed(result.Context);
 
                 await DeleteOriginalResponseAsync();
             }

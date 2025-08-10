@@ -17,11 +17,18 @@ namespace OSPC.Bot.Module.Info
         [Command("load")]
         [Summary("Load beatmap playcounts for a user")]
         public async Task LoadBeatmapPlaycounts(string username = "")
-            => await ReplyAsync(embed: (await _botCmds.LoadBeatmapPlaycounts(username, Context.GetOsuContext())).Embed);
+        {
+            var result = await _botCmds.LoadBeatmapPlaycounts(Context.GetOsuContext(), username);
+            await ReplyAsync(embed: result.Embed);
+        }
+
 
         [Command("link-profile")]
         public async Task LinkProfile(string username)
-            => await ReplyAsync(embed: (await _botCmds.LinkProfile(username, Context.GetOsuContext())).Embed);
+        {
+            var result = await _botCmds.LinkProfile(Context.GetOsuContext(), username);
+            await ReplyAsync(embed: result.Embed);
+        }
 
         [Command("help")]
         public async Task Help(string command = "")
