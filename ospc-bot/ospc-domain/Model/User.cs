@@ -4,7 +4,9 @@ namespace OSPC.Domain.Model
 {
     public class User
     {
+        public static string Unspecified = string.Empty;
         private static string _profileUrlBase = "https://osu.ppy.sh/users/";
+
         public int Id { get; set; }
         public string Username { get; set; } = string.Empty;
         [JsonPropertyName("country_code")]

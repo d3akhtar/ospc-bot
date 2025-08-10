@@ -5,7 +5,7 @@ using OSPC.Utils;
 
 namespace OSPC.Bot.Module.Info
 {
-    public class SettingsInfoModule : ModuleBase<SocketCommandContext>
+    public class SettingsInfoModule : InfoModule
     {
         private readonly IBotCommandService _botCmds;
 
@@ -17,18 +17,11 @@ namespace OSPC.Bot.Module.Info
         [Command("load")]
         [Summary("Load beatmap playcounts for a user")]
         public async Task LoadBeatmapPlaycounts(string username = "")
-        {
-            var result = await _botCmds.LoadBeatmapPlaycounts(Context.GetOsuContext(), username);
-            await ReplyAsync(embed: result.Embed);
-        }
-
+            => await ReplyBotCommandResultAsync(await _botCmds.LoadBeatmapPlaycounts(Context.GetOsuContext(), username));
 
         [Command("link-profile")]
         public async Task LinkProfile(string username)
-        {
-            var result = await _botCmds.LinkProfile(Context.GetOsuContext(), username);
-            await ReplyAsync(embed: result.Embed);
-        }
+            => await ReplyBotCommandResultAsync(await _botCmds.LinkProfile(Context.GetOsuContext(), username));
 
         [Command("help")]
         public async Task Help(string command = "")

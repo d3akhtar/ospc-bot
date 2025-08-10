@@ -9,12 +9,13 @@ using OSPC.Utils;
 
 namespace OSPC.Bot.Module.Interaction
 {
-    public class TrackInteractionModule : InteractionModuleBase<SocketInteractionContext>
+    public class TrackInteractionModule : InteractionModule
     {
         private const int LIMIT = 25;
         private readonly IBeatmapRepository _beatmapRepo;
         private readonly IOsuWebClient _osuWebClient;
         private readonly IBotCommandService _botCmds;
+
         public TrackInteractionModule(IBeatmapRepository beatmapRepo, IOsuWebClient osuWebClient, IBotCommandService botCmds)
         {
             _beatmapRepo = beatmapRepo;
@@ -28,30 +29,11 @@ namespace OSPC.Bot.Module.Interaction
 
         [SlashCommand("most-played", "Get most played beatmaps for a user")]
         public async Task GetMostPlayed(string username)
-        {
-            await DeferAsync();
-            var result = await _botCmds.GetMostPlayed(Context.GetOsuContext(), username);
-            if (!result.Successful) {
-                await ReplyAsync(embed: result.Embed);
-                return;
-            }
-
-            result.Context!.Message = await ReplyAsync (
-                embed: result.Embed,
-                components: result.Components
-            );
-
-            Embeded.CreatePlaycountListEmbed(result.Context);
-
-            await DeleteOriginalResponseAsync();
-        }
+            => await RespondBotCommandResultAsync(await _botCmds.GetMostPlayed(Context.GetOsuContext(), username));
 
         [SlashCommand("playcount", "Get the playcount on a beatmap for a user")]
         public async Task GetPlaycount(string username = "", int beatmapId = -1)
-        {
-            var result = await _botCmds.GetPlaycount(Context.GetOsuContext(), username, beatmapId);
-            await RespondAsync(embed: result.Embed);
-        }
+            => await RespondBotCommandResultAsync(await _botCmds.GetPlaycount(Context.GetOsuContext(), username, beatmapId));
 
         [SlashCommand("search", "Search for beatmaps in most played")]
         public async Task Search(
@@ -67,15 +49,13 @@ namespace OSPC.Bot.Module.Interaction
         {
             (bool success, BeatmapFilter? beatmapFilter, beatmapFilterStr) = BeatmapFilter.ParseBeatmapFilter(beatmapFilterStr);
             if (!success) {
-                await RespondAsync(embed: Embeded.BuildErrorEmbed("Failed to parse beatmap filters."));
+                await RespondErrorAsync("Failed to parse beatmap filters.");
                 return;
             }
 
-            if (!string.IsNullOrEmpty(username) && !RegexPatterns.StrictUsernameRegex.IsMatch(username)) await RespondAsync("Invalid username format!");
-            else if (string.IsNullOrEmpty(query) && query == artist && artist == title && playcount == -1 && comparison == Comparison.None) await RespondAsync(embed: Embeded.BuildErrorEmbed("Either fill the query, or fill one or both of artist and title"));  
+            if (!string.IsNullOrEmpty(username) && !RegexPatterns.StrictUsernameRegex.IsMatch(username)) await RespondErrorAsync("Invalid username format!");
+            else if (UnfilledQuery(query, artist, title, playcount, comparison)) await RespondErrorAsync("Either fill only the query, or fill one or both of artist and title");  
             else {
-                await DeferAsync();
-                
                 SearchParams searchParams = new() {
                      Username = username,
                      Query = query,
@@ -85,22 +65,11 @@ namespace OSPC.Bot.Module.Interaction
                      BeatmapFilter = beatmapFilter!
                 };
 
-                var result = await _botCmds.Search(Context.GetOsuContext(), searchParams);
-
-                if (!result.Successful) {
-                    await RespondAsync(embed: result.Embed);
-                    return;
-                }
-
-                result.Context!.Message = await ReplyAsync (
-                    embed: result.Embed,
-                    components: result.Components
-                );
-
-                Embeded.CreatePlaycountListEmbed(result.Context);
-
-                await DeleteOriginalResponseAsync();
+                await RespondBotCommandResultAsync(await _botCmds.Search(Context.GetOsuContext(), searchParams));
             }
         }
+
+        private bool UnfilledQuery(string query, string artist, string title, int playcount, Comparison comparison)
+            => string.IsNullOrEmpty(query) && query == artist && artist == title && playcount == -1 && comparison == Comparison.None;
     }
 }
