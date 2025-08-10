@@ -155,7 +155,13 @@ namespace OSPC.Utils
 
         private static string GetMemberName<T>(Expression<Func<SearchParams,T>> exp)
         {
-            return ExpUtils.GetMemberName<SearchParams,T>(exp);
-        }
+            MemberExpression? me = exp.Body switch
+            {
+                   UnaryExpression u => u.Operand as MemberExpression,
+                   MemberExpression m => m,
+                   _ => throw new Exception()
+            };
+
+            return me?.Member.Name ?? throw new NullReferenceException("GetMemberExpressionPropertyName<TIn,TOut>()");        }
     }
 }
