@@ -1,4 +1,5 @@
 using Discord.Interactions;
+using Microsoft.Extensions.Logging;
 using OSPC.Bot.Command;
 using OSPC.Bot.Component;
 using OSPC.Utils;
@@ -9,8 +10,9 @@ namespace OSPC.Bot.Module.Interaction
     {
         private readonly IBotCommandService _botCmds;
 
-        public SettingsInteractionModule(IBotCommandService botCmds)
+        public SettingsInteractionModule(ILogger<SettingsInteractionModule> logger, IBotCommandService botCmds)
         {
+            _logger = logger;
             _botCmds = botCmds;
         }
 

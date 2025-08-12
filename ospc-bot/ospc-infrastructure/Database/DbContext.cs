@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 using OSPC.Domain.Options;
@@ -7,17 +8,21 @@ namespace OSPC.Infrastructure.Database
 {
     public class DbContext
     {
+        private readonly ILogger<DbContext> _logger;
         private readonly IOptions<DatabaseOptions> _databaseOptions;
         private readonly IRedisService _redis;
 
-        public DbContext(IOptions<DatabaseOptions> databaseOptions, IRedisService redis)
+        public DbContext(ILogger<DbContext> logger, IOptions<DatabaseOptions> databaseOptions, IRedisService redis)
         {
+            _logger = logger;
             _databaseOptions = databaseOptions;
             _redis = redis;
         }
 
         public async Task<T> ExecuteAsync<T>(Func<MySqlConnection, Task<T>> action)
         {
+            _logger.LogDebug("Executing MySQL action for type: {@TypeInfo}", typeof(T));
+            
             await using var connection =  new MySqlConnection(_databaseOptions.Value.ConnectionString);
             await connection.OpenAsync();
             return await action(connection);
@@ -25,50 +30,34 @@ namespace OSPC.Infrastructure.Database
 
         public async Task ExecuteAsync(Func<MySqlConnection, Task> action)
         {
+            _logger.LogDebug("Executing MySQL action");
+
             await using var connection =  new MySqlConnection(_databaseOptions.Value.ConnectionString);
             await connection.OpenAsync();
             await action(connection);
         }
 
-        public async Task<T> ExecuteQueryAsync<T>(string query, string key, Func<MySqlConnection, string, Task<T>> action)
-        {
-            Console.WriteLine($"\nExecuting query: {query}");
-            var command = new MySqlCommand();
-            T? res = await _redis.GetQuery<T>(key);
-            if (res != null) {
-                Console.WriteLine("Cache hit");
-                return res;
-            }
-            else {
-                Console.WriteLine("Cache miss");
-                await using var connection =  new MySqlConnection(_databaseOptions.Value.ConnectionString);
-                await connection.OpenAsync();
-                res = await action(connection, query);
-                if (res != null) await _redis.SaveQuery(key, res);
-                return res;
-            }
-        }
-
         public async Task<T> ExecuteCommandAsync<T>(string key, Func<MySqlConnection, Task<T>> action)
         {
-            Console.WriteLine($"\nExecuting command, key: {key}");
+            _logger.LogDebug("Executing MySQL command for type: {@TypeInfo}", typeof(T));
+
             T? res = await _redis.GetQuery<T>(key);
-            if (res is not null) {
-                Console.WriteLine("Cache hit");
-                return res;
-            }
+            if (res is not null) return res;
             else {
-                Console.WriteLine("Cache miss");
+                _logger.LogDebug("Cache key: {Key} not found, retreiving from database", key);
                 await using var connection =  new MySqlConnection(_databaseOptions.Value.ConnectionString);
                 await connection.OpenAsync();
                 res = await action(connection);
                 if (res != null) await _redis.SaveQuery(key, res);
+                else _logger.LogDebug("Couldn't find anything from database");
                 return res;
             }
         }
 
         public async Task<bool> ExecuteInsertAsync(List<string> invalidatedKeys, Func<MySqlConnection, Task<bool>> action)
         {
+            _logger.LogDebug("Executing MySQL insert command");
+            
             await _redis.InvalidateKeys(invalidatedKeys);
             await using var connection =  new MySqlConnection(_databaseOptions.Value.ConnectionString);
             await connection.OpenAsync();

@@ -1,5 +1,6 @@
 using Discord.Commands;
 using Discord.Interactions;
+using Microsoft.Extensions.Logging;
 using OSPC.Bot.Command.Result;
 using OSPC.Bot.Component;
 using SearchResult = OSPC.Bot.Command.Result.SearchResult;
@@ -7,7 +8,9 @@ using SearchResult = OSPC.Bot.Command.Result.SearchResult;
 namespace OSPC.Bot.Module.Interaction
 {
 	public class InteractionModule : InteractionModuleBase<SocketInteractionContext>
-	{
+	{		
+        protected ILogger _logger = default;
+		
 		public async Task RespondBotCommandResultAsync(CommandResult result)
 		{
 			if (result is SearchResult searchResult) await RespondSearchResultAsync(searchResult);
@@ -18,10 +21,15 @@ namespace OSPC.Bot.Module.Interaction
 			=> await RespondAsync(embed: Embeded.BuildErrorEmbed(message));
 
 		private async Task RespondCommandResultAsync(CommandResult result)
-			=> await RespondAsync(embed: result.Embed);
+		{
+			_logger.LogInformation("Responding with command result: {@CommandResult}", result);
+			await RespondAsync(embed: result.Embed);
+		}
 		
 		private async Task RespondSearchResultAsync(SearchResult result)
 		{
+			_logger.LogInformation("Responding with search result: {@SearchResult}", result);
+			
             await DeferAsync();
 
             if (!result.Successful) {

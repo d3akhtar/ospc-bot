@@ -44,7 +44,6 @@ namespace OSPC.Bot.Component
 
         private async static Task DeleteButtons(IUserMessage message)
         {
-            Console.WriteLine("Deleting...");
             await message.ModifyAsync(
                 msg => msg.Components = new ComponentBuilder().Build(), 
                 options: new RequestOptions
@@ -53,6 +52,7 @@ namespace OSPC.Bot.Component
                     RetryMode = RetryMode.RetryRatelimit | RetryMode.RetryTimeouts,
                 }
             );
+
             BotClient.Instance.CurrentPageForEmbed.Remove(message.Id);
             BotClient.Instance.LastButtonIdClickedForEmbeded.Remove(message.Id);
             ActiveEmbeds.Remove(message.Id);

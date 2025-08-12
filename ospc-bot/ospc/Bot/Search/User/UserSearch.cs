@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
@@ -7,35 +8,27 @@ namespace OSPC.Bot.Search.UserSearch
 {
     public class UserSearch : IUserSearch
     {
+        private readonly ILogger<UserSearch> _logger;
         private readonly IUserRepository _userRepo;
         private readonly IOsuWebClient _osuWebClient;
 
-        public UserSearch(IUserRepository userRepo, IOsuWebClient osuWebClient)
+        public UserSearch(ILogger<UserSearch> logger, IUserRepository userRepo, IOsuWebClient osuWebClient)
 		{
+			_logger = logger;
 			_userRepo = userRepo;
 			_osuWebClient = osuWebClient;
 		}
 		
         public async Task<User?> SearchUser(string username, ChannelOsuContext? channelOsuContext = null)
         {
-			List<Task<User?>> userSearchTasks = new();
+			_logger.LogDebug("Searching for user using username: {Username} and context: {@ChannelOsuContext}", username, channelOsuContext);
 
-			if (channelOsuContext != null && username == User.Unspecified)
-				userSearchTasks.Add(_userRepo.GetUserWithDiscordId(channelOsuContext.DiscordUserId));
-			else
-				userSearchTasks.Add(_userRepo.GetUserByUsername(username));
+			User? user = channelOsuContext != null && username == User.Unspecified ?
+				await _userRepo.GetUserWithDiscordId(channelOsuContext.DiscordUserId):
+				await _userRepo.GetUserByUsername(username);
 
-			userSearchTasks.Add(_osuWebClient.FindUserWithUsername(username));
-
-			foreach (var task in userSearchTasks) {
-				var user = await task;
-				if (user != null) {
-					await _userRepo.AddUser(user);
-					return user;
-				}
-			}
-
-			return null;
+			if (user == null) return await _osuWebClient.FindUserWithUsername(username);
+			else return user;
         }
     }
 }

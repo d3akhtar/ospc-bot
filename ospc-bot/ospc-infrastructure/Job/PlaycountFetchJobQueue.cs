@@ -1,4 +1,5 @@
 using System.Threading.Channels;
+using Microsoft.Extensions.Logging;
 using OSPC.Infrastructure.Http;
 
 namespace OSPC.Infrastructure.Job
@@ -8,18 +9,20 @@ namespace OSPC.Infrastructure.Job
         private HashSet<int> _servicedUserIds = new();
         private readonly Channel<int> _userIdChannel;
         private Queue<string> _servicedUsernameQueue = new();
+        private readonly ILogger<PlaycountFetchJobQueue> _logger;
         private readonly IOsuWebClient _osuWebClient;
         private readonly CancellationTokenSource _cts = new();
 
-        public PlaycountFetchJobQueue(IOsuWebClient osuWebClient)
+        public PlaycountFetchJobQueue(ILogger<PlaycountFetchJobQueue> logger, IOsuWebClient osuWebClient)
         {
+            _logger = logger;
             _osuWebClient = osuWebClient;
             _userIdChannel = Channel.CreateUnbounded<int>();
             Task.Run(LoadBeatmapPlaycountsAsync);
         }
 
         public async Task EnqueueAsync(int userId, string username) {
-            Console.WriteLine($"Queued user with id: {userId}");
+            _logger.LogInformation("Added {Username} to the queue, id: {UserId}", username, userId);
             await _userIdChannel.Writer.WriteAsync(userId);
             _servicedUsernameQueue.Enqueue(username);
             _servicedUserIds.Add(userId);
@@ -31,7 +34,7 @@ namespace OSPC.Infrastructure.Job
             {
                 while (_userIdChannel.Reader.TryRead(out int userId))
                 {
-                    Console.WriteLine($"Servicing user with id: {userId}");
+                    _logger.LogInformation("Servicing user with id: {UserId}", userId);
                     await _osuWebClient.LoadUserPlayedMaps(userId);
                     _servicedUserIds.Remove(userId);
                     _servicedUsernameQueue.Dequeue();

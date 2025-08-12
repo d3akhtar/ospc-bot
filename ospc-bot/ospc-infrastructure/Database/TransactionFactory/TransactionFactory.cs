@@ -1,13 +1,23 @@
+using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using OSPC.Domain.Model;
 
-namespace OSPC.Infrastructure.Database
+namespace OSPC.Infrastructure.Database.TransactionFactory
 {
-	public static class TransactionFactory
+	public class TransactionFactory : ITransactionFactory
 	{
-		public static async Task<MySqlTransaction> CreateAddBeatmapPlaycountTransaction(MySqlConnection conn, IEnumerable<BeatmapPlaycount> bpcs)
+        private readonly ILogger<TransactionFactory> _logger;
+
+        public TransactionFactory(ILogger<TransactionFactory> logger)
 		{
-			Console.WriteLine("???");
+			_logger = logger;
+		}
+		
+		public async Task<MySqlTransaction> CreateAddBeatmapPlaycountTransaction(MySqlConnection conn, IEnumerable<BeatmapPlaycount> bpcs)
+		{
+			LogTransactionCreation(new { BeatmapPlaycountBeatmapIds = bpcs.Select(bpc => bpc.BeatmapId) } );
+
 			var transaction = await conn.BeginTransactionAsync(); 
 			string query = "CALL AddBeatmapPlaycount(@UserId, @BeatmapId, @Count)";
 			var command = new MySqlCommand(query, conn, transaction);
@@ -23,16 +33,18 @@ namespace OSPC.Infrastructure.Database
 	                command.Parameters["@Count"].Value = bpc.Count;
 	                await command.ExecuteNonQueryAsync();
 				}
-			} catch (Exception ex) { Console.WriteLine($"Error occured while creating AddBeatmapPlaycountTransaction: {ex.Message}");}
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}");
+				throw;
+			}
 
-			Console.WriteLine($"Command for transaction: {command.CommandText}");
-			foreach (MySqlParameter param in command.Parameters) Console.WriteLine($"{param.ParameterName} => {param.Value}");
-			
 			return transaction;
 		}
 
-		public static async Task<MySqlTransaction> CreateAddBeatmapTransaction(MySqlConnection conn, IEnumerable<Beatmap> beatmaps)
+		public async Task<MySqlTransaction> CreateAddBeatmapTransaction(MySqlConnection conn, IEnumerable<Beatmap> beatmaps)
 		{
+			LogTransactionCreation(new { BeatmapIds = beatmaps.Select(beatmap => beatmap.Id )});
+			
 			var transaction = await conn.BeginTransactionAsync();			
             string query = "CALL AddBeatmap(@Id, @Version, @DifficultyRating, @BeatmapSetId, @CircleSize, @BPM, @Length, @HpDrain, @OD, @AR)";
 			var command = new MySqlCommand(query, conn,transaction);
@@ -62,40 +74,46 @@ namespace OSPC.Infrastructure.Database
 	                command.Parameters["@AR"].Value = beatmap.AR;
 	                await command.ExecuteNonQueryAsync();
 	            }
-			} catch (Exception ex) { Console.WriteLine($"Error occured while creating AddBeatmapTransaction: {ex.Message}"); }
-
-			Console.WriteLine($"Command for transaction: {command.CommandText}");
-			foreach (MySqlParameter param in command.Parameters) Console.WriteLine($"{param.ParameterName} => {param.Value}");
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}");
+				throw;
+			}
 
 			return transaction;
 		}
 
-		public static async Task<MySqlTransaction> CreateAddBeatmapSetTransaction(MySqlConnection conn, IEnumerable<BeatmapSet> beatmapSets)
+		public async Task<MySqlTransaction> CreateAddBeatmapSetTransaction(MySqlConnection conn, IEnumerable<BeatmapSet> beatmapSets)
 		{
+			LogTransactionCreation(new { BeatmapSetIds = beatmapSets.Select(beatmapSet => beatmapSet.Id) });
+			
 			var transaction = await conn.BeginTransactionAsync();
 			string query = "CALL AddBeatmapSet(@Id, @Artist, @Title, @SlimCover2x, @UserId)";
 			var command = new MySqlCommand(query, conn, transaction);
-			
-            command.Parameters.Add("@Id", MySqlDbType.Int32);
-            command.Parameters.Add("@Artist", MySqlDbType.VarChar);
-            command.Parameters.Add("@Title", MySqlDbType.VarChar);
-            command.Parameters.Add("@SlimCover2x", MySqlDbType.VarChar);
-            command.Parameters.Add("@UserId", MySqlDbType.Int32);
 
-            foreach (BeatmapSet set in beatmapSets){
-                command.Parameters["@Id"].Value = set.Id;
-                command.Parameters["@Artist"].Value = set.Artist;
-                command.Parameters["@Title"].Value = set.Title;
-                command.Parameters["@SlimCover2x"].Value = set.Covers.SlimCover2x;
-                command.Parameters["@UserId"].Value = set.UserId;
-                await command.ExecuteNonQueryAsync();
-            }
+			try {
+	            command.Parameters.Add("@Id", MySqlDbType.Int32);
+	            command.Parameters.Add("@Artist", MySqlDbType.VarChar);
+	            command.Parameters.Add("@Title", MySqlDbType.VarChar);
+	            command.Parameters.Add("@SlimCover2x", MySqlDbType.VarChar);
+	            command.Parameters.Add("@UserId", MySqlDbType.Int32);
 
-			Console.WriteLine($"Command for transaction: {command.CommandText}");
-			foreach (MySqlParameter param in command.Parameters) Console.WriteLine($"{param.ParameterName} => {param.Value}");
+	            foreach (BeatmapSet set in beatmapSets){
+	                command.Parameters["@Id"].Value = set.Id;
+	                command.Parameters["@Artist"].Value = set.Artist;
+	                command.Parameters["@Title"].Value = set.Title;
+	                command.Parameters["@SlimCover2x"].Value = set.Covers.SlimCover2x;
+	                command.Parameters["@UserId"].Value = set.UserId;
+	                await command.ExecuteNonQueryAsync();
+	            }
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}");
+				throw;
+			}
 
 			return transaction;
 		}
+
+		private void LogTransactionCreation(object arguments, [CallerMemberName] string? methodName = null)
+			=> _logger.LogDebug("Creating transaction from method: {MethodName} with arguments: {@Arguments}", methodName, arguments);
 	}
 }
-

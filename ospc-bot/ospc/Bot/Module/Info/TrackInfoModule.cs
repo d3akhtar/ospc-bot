@@ -1,5 +1,6 @@
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Logging;
 using OSPC.Bot.Command;
 using OSPC.Bot.Component;
 using OSPC.Bot.Context;
@@ -16,8 +17,9 @@ namespace OSPC.Bot.Module.Info
         private readonly IOsuWebClient _osuWebClient;
         private readonly IBotCommandService _botCmds;
 
-        public TrackInfoModule(IBotCommandService botCmds, IBeatmapRepository beatmapRepo, IOsuWebClient osuWebClient)
+        public TrackInfoModule(ILogger<TrackInfoModule> logger, IBotCommandService botCmds, IBeatmapRepository beatmapRepo, IOsuWebClient osuWebClient)
         {
+            _logger = logger;
             BotClient.Instance.PageForEmbedUpdated += PageForEmbedUpdated;
             _botCmds = botCmds;
             _beatmapRepo = beatmapRepo;

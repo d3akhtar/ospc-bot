@@ -7,20 +7,23 @@ using OSPC.Domain.Options;
 using OSPC.Domain.Model.DTO;
 using OSPC.Infrastructure.Caching;
 using OSPC.Infrastructure.Database.Repository;
+using Microsoft.Extensions.Logging;
 
 namespace OSPC.Infrastructure.Http
 {
     public class OsuWebClient : IOsuWebClient
     {
         private HttpClient _httpClient;
+        private readonly ILogger<OsuWebClient> _logger;
         private readonly IOptions<OsuWebApiOptions> _osuWebApiOptions;
         private readonly IRedisService _redis;
         private readonly IBeatmapRepository _beatmapRepo;
         private readonly int requestsPerMinute = 60;
         private List<DateTime> requestsWithinMinute = new();
         
-        public OsuWebClient(IRedisService redis, IBeatmapRepository beatmapRepo, IOptions<OsuWebApiOptions> osuWebApiOptions)
+        public OsuWebClient(ILogger<OsuWebClient> logger, IRedisService redis, IBeatmapRepository beatmapRepo, IOptions<OsuWebApiOptions> osuWebApiOptions)
         {
+            _logger = logger;
             _osuWebApiOptions = osuWebApiOptions;
             _redis = redis;
             _beatmapRepo = beatmapRepo;
@@ -30,6 +33,8 @@ namespace OSPC.Infrastructure.Http
 
         public async Task<List<BeatmapPlaycount>> GetBeatmapPlaycountsForUser(int userId, int limit = 100, int offset = 0)
         {
+            _logger.LogInformation("Getting beatmap playcounts for userId: {UserId}", userId);
+            
             var accessToken = await GetAccessToken();
             var uri = _osuWebApiOptions.Value.BaseUrl + $"users/{userId}/beatmapsets/most_played?limit={limit}&offset={offset}";
 
@@ -45,6 +50,8 @@ namespace OSPC.Infrastructure.Http
 
         public async Task<User?> FindUserWithUsername(string username)
         {
+            _logger.LogInformation("Finding user with username: {Username}", username);
+            
             var accessToken = await GetAccessToken();
             var uri = _osuWebApiOptions.Value.BaseUrl + $"users/@{username}";
 
@@ -56,6 +63,8 @@ namespace OSPC.Infrastructure.Http
 
         public async Task LoadUserPlayedMaps(int userId)
         {
+            _logger.LogInformation("Loading user played maps for userId: {UserId}", userId);
+            
             int limit = 50;
             int offset = 0;
             int count = 0;
@@ -70,7 +79,6 @@ namespace OSPC.Infrastructure.Http
                 offset += limit;
                 count += beatmapPlaycounts.Count;
                 foreach(var b in beatmapPlaycounts) {
-                    // File.AppendAllText($"maps_{userId}.txt", b + "\n");
                     if (!beatmapSetIds.Contains(b.BeatmapSet!.Id)){
                         beatmapSetIds.Add(b.BeatmapSet.Id);
                         beatmapSets.Add(b.BeatmapSet);
@@ -90,20 +98,23 @@ namespace OSPC.Infrastructure.Http
                 beatmapSets.Clear();
             }
 
-            Console.WriteLine($"Loaded {count} beatmaps for {userId}");
+            _logger.LogInformation("Loaded {Count} beatmap playcounts for user with id: {UserId}", count, userId);
         }
 
         public async Task<UserRankStatistic?> GetUserRankStatistics(int userId)
         {
+            _logger.LogInformation("Getting rank statistics for userId: {UserId}", userId);
+            
             UserRankStatistic? stat = await _redis.GetUserRankStatisticAsync(userId);
             if (stat != null) return stat;
 
             var accessToken = await GetAccessToken();
             var uri = _osuWebApiOptions.Value.BaseUrl + $"users/{userId}";
-            Console.WriteLine($"uri: {uri}");
             var res = await SendRequestWithAccessToken(uri, accessToken);
             if (res.IsSuccessStatusCode) {
                 var json = await res.Content.ReadAsStringAsync();
+
+                // TODO: Move this to UserRankStatistic
                 using JsonDocument doc = JsonDocument.Parse(json);
                 JsonElement statistic = doc.RootElement.GetProperty("statistics");
                 stat = JsonSerializer.Deserialize<UserRankStatistic>(statistic.GetRawText());
@@ -114,6 +125,8 @@ namespace OSPC.Infrastructure.Http
 
         public async Task<List<Beatmap>> GetBeatmapStats(IEnumerable<int> beatmapIds)
         {
+            _logger.LogInformation("Getting beatmap stats for beatmapIds: {@BeatmapIds}", beatmapIds);
+            
             if (beatmapIds.Count() == 0) return new();
 
             var accessToken = await GetAccessToken();
@@ -152,46 +165,59 @@ namespace OSPC.Infrastructure.Http
 
             var res = await _httpClient.SendAsync(request);
 
+            if (!res.IsSuccessStatusCode) {
+                _logger.LogCritical("Couldn't get client credentials");
+                throw new HttpRequestException(res.ToString());
+            }
+
             return (await res.Content.ReadFromJsonAsync<ClientCredentials>())!;
         }
 
         private async Task<string> GetAccessToken()
         {
-            string? accessToken = await _redis.GetAccessTokenAsync();
-            if (accessToken == null) {
-                var credentials = await GetClientCredentials();
-                await _redis.SetAccessTokenAsync(credentials.AccessToken, credentials.ExpiresIn);
-                accessToken = credentials.AccessToken;
+            try {
+                string? accessToken = await _redis.GetAccessTokenAsync();
+                if (accessToken == null) {
+                    var credentials = await GetClientCredentials();
+                    await _redis.SetAccessTokenAsync(credentials.AccessToken, credentials.ExpiresIn);
+                    accessToken = credentials.AccessToken;
+                }
+                return accessToken;
             }
-
-            return accessToken;
+            catch (Exception e) {
+                _logger.LogCritical(e, "Couldn't get access token");
+                throw;
+            }
         }
 
         private async Task<T?> SendRequestWithAccessToken<T>(HttpRequestMessage request, string accessToken) where T : class
         {
-            Console.WriteLine($"Request uri = {request.RequestUri}");
+            _logger.LogInformation("Sending request to {Uri}", request.RequestUri);
             
             await HandleRateLimits();
 
             request.Headers.Add("Authorization", $"Bearer {accessToken}");
-            if (typeof(T) == typeof(List<Beatmap>)) Console.WriteLine("sending...");
             var res = await _httpClient.SendAsync(request);
-            if (typeof(T) == typeof(List<Beatmap>)) Console.WriteLine($"Res: {await res.Content.ReadAsStringAsync()}");
 
-            return res.IsSuccessStatusCode ?
-                await res.Content.ReadFromJsonAsync<T>():null;
+            if (res.IsSuccessStatusCode) return await res.Content.ReadFromJsonAsync<T>();
+            else {
+                _logger.LogWarning("Unsuccessful request: {@Result}", res);
+                return null;
+            }
         }
 
         private async Task<HttpResponseMessage> SendRequestWithAccessToken(string uri, string accessToken)
         {
-            Console.WriteLine($"Request uri = {uri}");
+            _logger.LogInformation("Sending request to {Uri}", uri);
                         
             await HandleRateLimits();
             
             HttpRequestMessage request = new(HttpMethod.Get, uri);
             request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
-            return await _httpClient.SendAsync(request);
+            var res = await _httpClient.SendAsync(request);
+            if (!res.IsSuccessStatusCode) _logger.LogWarning("Unsuccessful request: {@Result}", res);
+            return res;
         }
 
         private async Task HandleRateLimits()
@@ -206,7 +232,7 @@ namespace OSPC.Infrastructure.Http
             if (requestsWithinMinute.Count > requestsPerMinute){
                 var latestRequestTime = requestsWithinMinute[0];
                 var timeDifference = (int)(60 - (DateTime.Now - latestRequestTime).TotalSeconds) + 1;
-                Console.WriteLine($"Hit rate limit of 60req/min, sleeping for: {timeDifference} sec");
+                _logger.LogWarning("Hit rate limit of 60req/min, sleeping for: {TimeDifference} seconds", timeDifference);
                 await Task.Delay(timeDifference * 1000);
             }
         }

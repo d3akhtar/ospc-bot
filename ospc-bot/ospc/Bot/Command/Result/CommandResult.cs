@@ -20,5 +20,8 @@ namespace OSPC.Bot.Command.Result
 				Embed = embed,
 				Successful = true
 			};
+
+		public override string ToString()
+			=> $"Success: {Successful} EmbedContent: {Embed.Description}";
 	}
 }

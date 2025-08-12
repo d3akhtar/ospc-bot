@@ -19,6 +19,10 @@ using OSPC.Infrastructure.Http;
 using OSPC.Infrastructure.Job;
 using OSPC.Domain.Options;
 using OSPC.Utils;
+using Serilog;
+using OSPC.Bot.MessageHandlers;
+using OSPC.Infrastructure.Database.CommandFactory;
+using OSPC.Infrastructure.Database.TransactionFactory;
 
 namespace OSPC.Bot
 {
@@ -29,7 +33,14 @@ namespace OSPC.Bot
         private CommandService _cmds;
         private InteractionService _interactService;
         private IServiceProvider _serviceProvider;
+        private IConfigurationRoot _config;
 
+        private SimpleMessageHandler _simpleMessageHandler;
+        private InteractionHandler _interactionHandler;
+        private PagedMessageHandler _pagedMessageHandler;
+
+        // TODO: THIS SUCKS, DO IT ANOTHER WAY AT SOME POINT
+        public async Task InvokePageForEmbedUpdatedEvent(ulong id) => await PageForEmbedUpdated!.Invoke(id);
         public event Func<ulong,Task>? PageForEmbedUpdated;
         public Dictionary<ulong, int> CurrentPageForEmbed { get; set; } = new();
         public Dictionary<ulong, ButtonType> LastButtonIdClickedForEmbeded { get; set; } = new();
@@ -37,46 +48,60 @@ namespace OSPC.Bot
         public BotClient()
         {
             Instance = this;
-
-            SetupClient();
-            SetupServiceProvider();
+            SetupApp();
         }
-
-        private void SetupClient()
+        
+        public async Task StartAsync()
         {
-            DiscordSocketConfig discordSocketConfig = new DiscordSocketConfig
+            using (var scope = _serviceProvider.CreateScope())
             {
-                GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
-            };
-            
-            _client = new DiscordSocketClient(discordSocketConfig);
-            
-            _client.Ready += OnClientReady;
-            _client.InteractionCreated += OnInteraction;
-            _client.MessageCommandExecuted += OnInteraction;
-            _client.UserCommandExecuted += OnInteraction;
-            _client.ButtonExecuted += OnButtonClick;
-            _client.ModalSubmitted += OnModalSubmit;
-            _client.MessageReceived += OnMsgReceived;
+                var discordOptions = scope.ServiceProvider.GetRequiredService<IOptions<DiscordOptions>>();
 
-            _interactService = new InteractionService(_client.Rest);
-            _cmds = new CommandService();
+                new LoggingService(_client, _cmds, _interactService);
+                
+                await _client.LoginAsync(TokenType.Bot, discordOptions.Value.Token);
+                await _client.StartAsync();
+
+                await Task.Delay(-1); // Block               
+            }
         }
 
-        private void SetupServiceProvider()
+        private void SetupApp()
         {
-            IConfiguration config = new ConfigurationBuilder()
+            SetupConfiguration();
+            SetupLogging();
+            SetupServiceProvider();
+            SetupClient();
+        }
+
+        private void SetupLogging()
+        {
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(_config)
+                .CreateLogger();
+        }
+
+        private void SetupConfiguration()
+        {
+            _config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
-
+        }
+        
+        private void SetupServiceProvider()
+        {
             var serviceCollection = new ServiceCollection();
 
+            serviceCollection.AddLogging(builder =>
+            {
+                builder.AddSerilog();
+            });
+            
             serviceCollection
-                .AddAppOption<DatabaseOptions>(config)
-                .AddAppOption<DiscordOptions>(config)
-                .AddAppOption<LoggingOptions>(config)
-                .AddAppOption<OsuWebApiOptions>(config)
-                .AddAppOption<CacheOptions>(config)
+                .AddAppOption<DatabaseOptions>(_config)
+                .AddAppOption<DiscordOptions>(_config)
+                .AddAppOption<OsuWebApiOptions>(_config)
+                .AddAppOption<CacheOptions>(_config)
                 .AddSingleton<IOsuWebClient, OsuWebClient>()
                 .AddSingleton<IRedisService, RedisService>()
                 .AddSingleton<PlaycountFetchJobQueue>()
@@ -85,129 +110,42 @@ namespace OSPC.Bot
                 .AddScoped<IBeatmapRepository, BeatmapRepository>()
                 .AddScoped<IOsuWebClient, OsuWebClient>()
                 .AddScoped<IUserSearch, UserSearch>()
-                .AddScoped<IBotCommandService, BotCommandService>();
+                .AddScoped<IBotCommandService, BotCommandService>()
+                .AddSingleton<ICommandFactory, CommandFactory>()
+                .AddSingleton<ITransactionFactory, TransactionFactory>();
             
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
-
-        private async Task OnModalSubmit(SocketModal modal)
+        
+        private void SetupClient()
         {
-            ulong msgId = modal.Message.Id;
-            Console.WriteLine($"msgId: {msgId}");
-            try {
-                switch (modal.Data.CustomId) {
-                    case "target_page_number": {
-                        await modal.DeferAsync();
-                        CurrentPageForEmbed[msgId] = int.Parse(modal.Data.Components.First(x => x.CustomId == "page_number").Value);
-                        LastButtonIdClickedForEmbeded[msgId] = ButtonType.NextPage;
-                        Embeded.PauseTimer(modal.Message);
-                        await PageForEmbedUpdated!.Invoke(msgId);
-                        Embeded.ResetTimer(modal.Message);
-                        break;
-                    }
-                    default: throw new Exception("Unknown modal");
-                }
-            } catch (TimeoutException) {
-                Console.WriteLine($"Msg: {msgId} not acknowledged yet");
-                switch (LastButtonIdClickedForEmbeded[msgId]) {
-                    case ButtonType.Unknown: break;
-                    case ButtonType.PreviousPage: {
-                        CurrentPageForEmbed[msgId]++;
-                        LastButtonIdClickedForEmbeded[msgId] = ButtonType.Unknown;
-                        break;
-                    }
-                    case ButtonType.NextPage: {
-                        CurrentPageForEmbed[msgId]--;
-                        LastButtonIdClickedForEmbeded[msgId] = ButtonType.Unknown;
-                        break;
-                    }
-                }
-            }
+            DiscordSocketConfig discordSocketConfig = new DiscordSocketConfig
+            {
+                GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+            };
+            
+            _client = new DiscordSocketClient(discordSocketConfig);
+
+            SetupMessageHandlers();
+            
+            _client.Ready += OnClientReady;
+            _client.InteractionCreated += _interactionHandler.OnInteraction;
+            _client.MessageCommandExecuted += _interactionHandler.OnInteraction;
+            _client.UserCommandExecuted += _interactionHandler.OnInteraction;
+            _client.ButtonExecuted += _pagedMessageHandler.OnButtonClick;
+            _client.ModalSubmitted += _pagedMessageHandler.OnModalSubmit;
+            _client.MessageReceived += _simpleMessageHandler.OnMsgReceived;
         }
-
-        private async Task OnMsgReceived(SocketMessage message)
+        
+        private void SetupMessageHandlers()
         {
-            if (message.Author.IsBot) return;
+            _cmds = new CommandService();
+            _simpleMessageHandler = new SimpleMessageHandler(_client, _serviceProvider, _cmds);
+            
+            _interactService = new InteractionService(_client.Rest);
+            _interactionHandler = new InteractionHandler(_client, _serviceProvider, _interactService);
 
-            _ = Task.Run(async () => await HandleBeatmapLinks(message));
-
-            int argPos = 0;
-            var userMessage = message as SocketUserMessage;
-            if (userMessage.HasCharPrefix('=', ref argPos)) {
-                await _cmds.ExecuteAsync(
-                    context: new SocketCommandContext(_client, userMessage),
-                    argPos: argPos,
-                    services: _serviceProvider
-                );
-            }
-        }
-
-        private async Task HandleBeatmapLinks(SocketMessage message)
-        {
-            var match = RegexPatterns.OsuBeatmapLinkRegex.Match(message.Content);
-            if (match.Success){
-                int beatmapId = int.Parse(match.Groups[2].Value);
-                using (var scope = _serviceProvider.CreateAsyncScope())
-                {
-                    var beatmapRepo = scope.ServiceProvider.GetRequiredService<IBeatmapRepository>();
-                    await beatmapRepo.UpdateReferencedBeatmapIdForChannel(message.Channel.Id, beatmapId);
-                }
-            }
-        }
-
-        private async Task OnButtonClick(SocketMessageComponent component)
-        {
-            ulong msgId = component.Message.Id;
-            Console.WriteLine($"msgId: {msgId}");
-            try {
-                switch (component.Data.CustomId) {
-                    case "first_page":
-                        await component.DeferAsync();
-                        CurrentPageForEmbed[msgId] = 1;
-                        LastButtonIdClickedForEmbeded[msgId] = ButtonType.FirstPage;
-                        break;
-                    case "last_page":
-                        await component.DeferAsync();
-                        CurrentPageForEmbed[msgId] = Embeded.ActiveEmbeds[msgId].TotalPages;
-                        LastButtonIdClickedForEmbeded[msgId] = ButtonType.LastPage;
-                        break;
-                    case "choose_page":
-                        await component.RespondWithModalAsync(modal:  
-                        new ModalBuilder()
-                            .WithTitle("Enter ")
-                            .WithCustomId("target_page_number")
-                            .AddTextInput("Enter Page Number", "page_number", placeholder:"1").Build());
-                        break;
-                    case "next_page":
-                        await component.DeferAsync();
-                        CurrentPageForEmbed[msgId]++;
-                        LastButtonIdClickedForEmbeded[msgId] = ButtonType.NextPage;
-                        break;
-                    case "prev_page":
-                        await component.DeferAsync();
-                        CurrentPageForEmbed[msgId] = CurrentPageForEmbed[msgId] <= 1 ? 1:CurrentPageForEmbed[msgId]-1;
-                        LastButtonIdClickedForEmbeded[msgId] = ButtonType.PreviousPage;
-                        break;
-                }
-                Embeded.PauseTimer(component.Message);
-                await PageForEmbedUpdated!.Invoke(msgId);
-                Embeded.ResetTimer(component.Message);
-            } catch (TimeoutException) {
-                Console.WriteLine($"Msg: {msgId} not acknowledged yet");
-                switch (LastButtonIdClickedForEmbeded[msgId]) {
-                    case ButtonType.Unknown: break;
-                    case ButtonType.PreviousPage: {
-                        CurrentPageForEmbed[msgId]++;
-                        LastButtonIdClickedForEmbeded[msgId] = ButtonType.Unknown;
-                        break;
-                    }
-                    case ButtonType.NextPage: {
-                        CurrentPageForEmbed[msgId]--;
-                        LastButtonIdClickedForEmbeded[msgId] = ButtonType.Unknown;
-                        break;
-                    }
-                }
-            }
+            _pagedMessageHandler = new PagedMessageHandler();
         }
 
         private async Task OnClientReady()
@@ -220,32 +158,8 @@ namespace OSPC.Bot
                 await _interactService.RegisterCommandsToGuildAsync(guildId);
                 await _cmds.AddModulesAsync(assembly, _serviceProvider);
             } catch (HttpException e){
-                var json = JsonSerializer.Serialize(e.Errors);
-                Console.WriteLine(json);
+                Log.Error(e, "Error while client was getting ready");
             }
-        }
-
-        public async Task StartAsync()
-        {
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var discordOptions = scope.ServiceProvider.GetRequiredService<IOptions<DiscordOptions>>();
-                var loggingOptions = scope.ServiceProvider.GetRequiredService<IOptions<LoggingOptions>>();
-
-                new LoggingService(_client, _cmds, _interactService, loggingOptions.Value);
-                
-                await _client.LoginAsync(TokenType.Bot, discordOptions.Value.Token);
-                await _client.StartAsync();
-
-                await Task.Delay(-1); // Block               
-            }
-        }
-
-        private async Task OnInteraction(SocketInteraction interaction)
-        {
-            var scope = _serviceProvider.CreateScope();
-            var ctx = new SocketInteractionContext(_client, interaction);
-            await _interactService.ExecuteCommandAsync(ctx, scope.ServiceProvider);
         }
     }
 }

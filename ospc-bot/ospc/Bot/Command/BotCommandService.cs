@@ -1,4 +1,5 @@
 using Discord;
+using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using OSPC.Bot.Command.Result;
 using OSPC.Bot.Component;
@@ -14,6 +15,7 @@ namespace OSPC.Bot.Command
 {
     public class BotCommandService : IBotCommandService
     {
+        private readonly ILogger<BotCommandService> _logger;
         private readonly IUserRepository _userRepo;
         private readonly IBeatmapRepository _beatmapRepo;
         private readonly IOsuWebClient _osuWebClient;
@@ -22,9 +24,11 @@ namespace OSPC.Bot.Command
         private const int LIMIT = 25;
 
         public BotCommandService(
+            ILogger<BotCommandService> logger,
             IUserRepository userRepo, IBeatmapRepository beatmapRepo, IUserSearch userSearch, 
             IOsuWebClient osuWebClient, PlaycountFetchJobQueue jobQueue)
         {
+            _logger = logger;
             _userRepo = userRepo;
             _beatmapRepo = beatmapRepo;
             _osuWebClient = osuWebClient;
@@ -45,6 +49,8 @@ namespace OSPC.Bot.Command
 
         public async Task<CommandResult> GetPlaycount(ChannelOsuContext ctx, string username, int beatmapId)
         {
+            _logger.LogInformation("Getting playcount for {Username} on {BeatmapId} with context: {@Ctx}", username, beatmapId, ctx);
+            
             try {
                 if (!string.IsNullOrEmpty(username) && !RegexPatterns.StrictUsernameRegex.IsMatch(username)) 
                     return CommandResult.Error("Invalid username format!");
@@ -63,14 +69,16 @@ namespace OSPC.Bot.Command
                     UserRankStatistic? stats = await _osuWebClient.GetUserRankStatistics(user.Id);
                     return CommandResult.Success(Embeded.GetEmbedForSingleBeatmapPlaycount(bpc, user, stats));
                 }
-            } catch (MySqlException ex){
-                Console.WriteLine($"MySQL error: {ex.Message}");
+            } catch (Exception e){
+                _logger.LogError(e, "An error occurred while getting playcount for {Username}, beatmapId: {BeatmapId}", username, beatmapId);
                 return CommandResult.Error($"Something went wrong while getting playcount for `{username}`");
             }
         }
 
         public async Task<SearchResult> Search(ChannelOsuContext ctx, SearchParams searchParams)
         {
+            _logger.LogInformation("Searching beatmaps with searchParams: {@SearchParams} and context; {@Ctx}", searchParams, ctx);
+
             User? user = await _userSearch.SearchUser(searchParams.Username, ctx);
             if (user == null) return SearchResult.Error("User wasn't found");
             try {
@@ -96,14 +104,19 @@ namespace OSPC.Bot.Command
                     Context = embedContext,
                     Successful = true
                 };
-            } catch (Exception) { return SearchResult.Error($"Something went wrong while searching beatmap playcounts for {user!.Username}"); }
+            } catch (Exception e) {
+                _logger.LogError(e, "An error occurred while executing search command with params: {@SearchParams}", searchParams);
+                return SearchResult.Error($"Something went wrong while searching beatmap playcounts for {user!.Username}");
+            }
         }
 
         public async Task<SearchResult> GetMostPlayed(ChannelOsuContext ctx, string username)
             => await Search(ctx, SearchParams.ForMostPlayed(username));   
 
         public async Task<CommandResult> LinkProfile(ChannelOsuContext ctx, string username)
-        {            
+        {
+           _logger.LogInformation("Linking profile for {Username} using context: {@Ctx}", username, ctx);
+             
             try {
                 User? user = await _userSearch.SearchUser(username, ctx);
                 if (user == null) return CommandResult.Error("User not found!");
@@ -117,11 +130,16 @@ namespace OSPC.Bot.Command
                     return CommandResult.Success(Embeded.BuildSuccessEmbed(message, user.AvatarUrl, description));
                 }
                 
-            } catch (Exception) { return CommandResult.Error($"Something went wrong while linking user {username}"); }
+            } catch (Exception e) {
+                _logger.LogError(e, "An error occured while linking {Username} using channel context: {@ChannelOsuContext}", username, ctx);
+                return CommandResult.Error($"Something went wrong while linking user {username}");
+            }
         }
 
         public async Task<CommandResult> LoadBeatmapPlaycounts(ChannelOsuContext ctx, string username)
         {
+            _logger.LogInformation("Loading beatmap playcounts for {Username} using context: {Ctx}", username, ctx);
+
             try {
                 if (!RegexPatterns.StrictUsernameRegex.IsMatch(username)) return CommandResult.Error("Invalid username format!");
                 User? user = await _userSearch.SearchUser(username, ctx);
@@ -133,7 +151,10 @@ namespace OSPC.Bot.Command
                     await _jobQueue.EnqueueAsync(user.Id, user.Username);
                     return CommandResult.Success(Embeded.BuildSuccessEmbed($"{user.Username} has been added to the queue"));
                 }
-            } catch (Exception) { return CommandResult.Error($"Something went wrong while loading beatmap playcounts for {username}"); }
+            } catch (Exception e) {
+                _logger.LogError(e, "An error occurred while loading beatmap playcounts for {Username} using context: {ChannelOsuContext}", username, ctx);
+                return CommandResult.Error($"Something went wrong while loading beatmap playcounts for {username}");
+            }
         }
     }
 }
