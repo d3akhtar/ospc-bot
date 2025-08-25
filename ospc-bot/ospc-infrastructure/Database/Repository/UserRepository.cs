@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.CommandFactory;
-using OSPC.Utils;
+using OSPC.Utils.Cache;
 
 namespace OSPC.Infrastructure.Database.Repository
 {

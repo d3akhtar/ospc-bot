@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace OSPC.Utils.RegularExpressions
+namespace OSPC.Utils.Parsing.RegularExpressions
 {
 	public class RegexEvaluator
 	{

@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using OSPC.Utils.RegularExpressions;
 
-namespace OSPC.Utils
+namespace OSPC.Utils.Parsing
 {
     public class SearchParams
     {

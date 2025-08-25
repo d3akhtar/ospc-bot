@@ -1,6 +1,6 @@
 using OSPC.Domain.Model;
 
-namespace OSPC.Utils
+namespace OSPC.Utils.Cache
 {
     public static class CacheExpiryTimes
     {

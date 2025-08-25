@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OSPC.Domain.Model;
 using OSPC.Domain.Options;
-using OSPC.Utils;
+using OSPC.Utils.Cache;
 using StackExchange.Redis;
 
 namespace OSPC.Infrastructure.Caching

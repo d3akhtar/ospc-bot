@@ -8,6 +8,8 @@ using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
 using OSPC.Utils;
+using OSPC.Utils.Parsing;
+using OSPC.Utils.Parsing.RegularExpressions.Results;
 
 namespace OSPC.Bot.Module.Info
 {

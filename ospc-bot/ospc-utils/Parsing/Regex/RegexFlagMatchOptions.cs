@@ -1,4 +1,4 @@
-namespace OSPC.Utils.RegularExpressions
+namespace OSPC.Utils.Parsing.RegularExpressions
 {
 	[Flags]
 	public enum RegexFlagMatchOptions

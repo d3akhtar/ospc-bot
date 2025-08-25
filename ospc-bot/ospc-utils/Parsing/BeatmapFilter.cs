@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 
-namespace OSPC.Utils
+namespace OSPC.Utils.Parsing
 {
     public class BeatmapFilter
     {
