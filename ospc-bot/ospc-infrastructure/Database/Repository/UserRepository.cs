@@ -67,7 +67,7 @@ namespace OSPC.Infrastructure.Database.Repository
 
         public async Task<User?> GetUserByUsername(string username)
         {
-            _logger.LogDebug("Getting user info for {Username}}", username);
+            _logger.LogDebug("Getting user info for {Username}", username);
             
             string key = CacheKey.ConvertTypeToKey<User>((username, "osuign"));
             return await _db.ExecuteCommandAsync<User?>(key, async (conn) =>

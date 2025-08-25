@@ -140,8 +140,8 @@ namespace OSPC.Infrastructure.Database.CommandFactory
             MySqlCommand command = new MySqlCommand(query, conn);
             if (generalQuery) command.Parameters.AddWithValue("@query", searchParams.Query);
             else {
-                command.Parameters.AddWithValue("@artist", searchParams.Artist);
-                command.Parameters.AddWithValue("@title", searchParams.Title);
+                command.Parameters.AddWithValue("@artist", searchParams.Artist ?? string.Empty);
+                command.Parameters.AddWithValue("@title", searchParams.Title ?? string.Empty);
             }
             return command;
         }
@@ -182,6 +182,7 @@ namespace OSPC.Infrastructure.Database.CommandFactory
                         "
                     )}
                 ";
+			
             return (query, generalQuery);
         }
 

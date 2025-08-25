@@ -27,8 +27,12 @@ namespace OSPC.Bot.Search.UserSearch
 				await _userRepo.GetUserWithDiscordId(channelOsuContext.DiscordUserId):
 				await _userRepo.GetUserByUsername(username);
 
-			if (user == null) return await _osuWebClient.FindUserWithUsername(username);
-			else return user;
+			if (user == null) {
+				user = await _osuWebClient.FindUserWithUsername(username);
+				if (user is {} u) await _userRepo.AddUser(u);
+			}
+
+			return user;
         }
     }
 }
