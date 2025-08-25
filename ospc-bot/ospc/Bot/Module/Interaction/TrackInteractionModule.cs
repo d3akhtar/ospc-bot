@@ -50,9 +50,9 @@ namespace OSPC.Bot.Module.Interaction
             [Summary(name:"beatmap-filter", description: "Filter beatmaps similar to how you would do so in osu. Use the /help command for details")]
             string beatmapFilterStr = "")
         {
-            (bool success, BeatmapFilter? beatmapFilter, beatmapFilterStr) = BeatmapFilter.ParseBeatmapFilter(beatmapFilterStr);
-            if (!success) {
-                await RespondErrorAsync("Failed to parse beatmap filters.");
+            var beatmapFilterParseResult =  BeatmapFilter.Parse(beatmapFilterStr);
+            if (!beatmapFilterParseResult.Successful) {
+                await RespondErrorAsync(beatmapFilterParseResult.Error);
                 return;
             }
 
@@ -65,7 +65,7 @@ namespace OSPC.Bot.Module.Interaction
                      Artist = artist,
                      Title = title,
                      Exact = exact,
-                     BeatmapFilter = beatmapFilter!
+                     BeatmapFilter = beatmapFilterParseResult.Value!
                 };
 
                 await RespondBotCommandResultAsync(await _botCmds.Search(Context.GetOsuContext(), searchParams));

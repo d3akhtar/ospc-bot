@@ -1,9 +1,11 @@
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using OSPC.Utils.Parsing.RegularExpressions.Limitations;
+using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
 
 namespace OSPC.Utils.Parsing
 {
-    public class BeatmapFilter
+    public class BeatmapFilter : Parsable<BeatmapFilter>
     {
         public ComparisonFilter? CircleSize { get; set; }
         public ComparisonFilter? BPM { get; set; }
@@ -13,6 +15,11 @@ namespace OSPC.Utils.Parsing
         public ComparisonFilter? AR { get; set; }
         public ComparisonFilter? DifficultyRating { get; set; }
 
+        static BeatmapFilter()
+        {
+            SetupEvaluator();
+        }
+        
         public static string GetFilterAbbreviation(Expression<Func<BeatmapFilter,ComparisonFilter>> exp)
         => (exp.Body as MemberExpression)!.Member.Name switch {
             "CircleSize" => "cs",
@@ -34,57 +41,53 @@ namespace OSPC.Utils.Parsing
                GetClauseForAttribute(this, b => b.AR!) + 
                GetClauseForAttribute(this, b => b.DifficultyRating!);
 
-        public static (bool success, BeatmapFilter? filter, string cleaned) ParseBeatmapFilter(string input)
-        {
-            string cleaned = input;
-            
-            (bool success, ComparisonFilter? cs, cleaned) = GetBeatmapAttributeFilter(b => b.CircleSize!, cleaned);
-            if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? bpm, cleaned) = GetBeatmapAttributeFilter(b => b.BPM!, cleaned);
-            if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? length, cleaned) = GetBeatmapAttributeFilter(b => b.Length!, cleaned);
-            if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? hpDrain, cleaned) = GetBeatmapAttributeFilter(b => b.HpDrain!, cleaned);
-            if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? od, cleaned) = GetBeatmapAttributeFilter(b => b.OD!, cleaned);
-            if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? ar, cleaned) = GetBeatmapAttributeFilter(b => b.AR!, cleaned);
-            if (!success) return (false, null, cleaned);
-            (success, ComparisonFilter? difficultyRating, cleaned) = GetBeatmapAttributeFilter(b => b.DifficultyRating!, cleaned);
-            if (!success) return (false, null, cleaned);
-            
-            BeatmapFilter filter = new()
-            {
-                CircleSize = cs,
-                BPM = bpm,
-                Length = length,
-                HpDrain = hpDrain,
-                OD = od,
-                AR = ar,
-                DifficultyRating = difficultyRating
-            };
-
-            Console.WriteLine(cleaned);
-            
-            return (success, filter, cleaned);
-        }
-
         private static string GetClauseForAttribute(BeatmapFilter beatmapFilter, Expression<Func<BeatmapFilter,ComparisonFilter>> exp)
             => ComparisonConverter.CreateComparisonClause(
                 exp.Compile().Invoke(beatmapFilter), "Beatmaps", 
                 (exp.Body as MemberExpression)!.Member.Name
             );
         
-        private static (bool success, ComparisonFilter? filter, string cleaned) GetBeatmapAttributeFilter(Expression<Func<BeatmapFilter,ComparisonFilter>> exp, string input)
+        public static new void SetupEvaluator()
         {
-            string abbreviation = GetFilterAbbreviation(exp), cleaned = input;
-            Regex filterRegex = new Regex(RegexPatterns.BeatmapFilterRegexTemplate.Replace("{abbreviation}", abbreviation));
-            var matches = filterRegex.Matches(input);
-            cleaned = filterRegex.Replace(input, "");
-            (bool success, ComparisonFilter? filter) = ComparisonFilter.GetFilterFromMatch(matches);
-            return (success, filter, cleaned);
-        }
+            _regexEvaluator
+                .AddNumberComparison(b => b.CircleSize, GetFilterAbbreviation(b => b.CircleSize!))
+                    .AddLimitation(LimitMatchCount.Create(2))
+                .AddNumberComparison(b => b.BPM, GetFilterAbbreviation(b => b.BPM!))
+                    .AddLimitation(LimitMatchCount.Create(2))
+                .AddNumberComparison(b => b.Length, GetFilterAbbreviation(b => b.Length!))
+                    .AddLimitation(LimitMatchCount.Create(2))
+                .AddNumberComparison(b => b.HpDrain, GetFilterAbbreviation(b => b.HpDrain!))
+                    .AddLimitation(LimitMatchCount.Create(2))
+                .AddNumberComparison(b => b.OD, GetFilterAbbreviation(b => b.OD!))
+                    .AddLimitation(LimitMatchCount.Create(2))
+                .AddNumberComparison(b => b.AR, GetFilterAbbreviation(b => b.AR!))
+                    .AddLimitation(LimitMatchCount.Create(2))
+                .AddNumberComparison(b => b.DifficultyRating, GetFilterAbbreviation(b => b.DifficultyRating!))
+                    .AddLimitation(LimitMatchCount.Create(2));
 
+            
+            BindSetterToRegexGroup(b => b.CircleSize, (instance, matchValue)
+                => ReturnResultBasedOnMatchType<NumberComparisonValue>(instance, (instance, matchValue) => instance.CircleSize = ComparisonFilter.Create(matchValue), matchValue));
+
+            BindSetterToRegexGroup(b => b.BPM, (instance, matchValue)
+                => ReturnResultBasedOnMatchType<NumberComparisonValue>(instance, (instance, matchValue) => instance.BPM = ComparisonFilter.Create(matchValue), matchValue));
+
+            BindSetterToRegexGroup(b => b.Length, (instance, matchValue)
+                => ReturnResultBasedOnMatchType<NumberComparisonValue>(instance, (instance, matchValue) => instance.Length = ComparisonFilter.Create(matchValue), matchValue));
+
+            BindSetterToRegexGroup(b => b.HpDrain, (instance, matchValue)
+                => ReturnResultBasedOnMatchType<NumberComparisonValue>(instance, (instance, matchValue) => instance.HpDrain = ComparisonFilter.Create(matchValue), matchValue));
+
+            BindSetterToRegexGroup(b => b.OD, (instance, matchValue)
+                => ReturnResultBasedOnMatchType<NumberComparisonValue>(instance, (instance, matchValue) => instance.OD = ComparisonFilter.Create(matchValue), matchValue));
+
+            BindSetterToRegexGroup(b => b.AR, (instance, matchValue)
+                => ReturnResultBasedOnMatchType<NumberComparisonValue>(instance, (instance, matchValue) => instance.AR = ComparisonFilter.Create(matchValue), matchValue));
+
+            BindSetterToRegexGroup(b => b.DifficultyRating, (instance, matchValue)
+                => ReturnResultBasedOnMatchType<NumberComparisonValue>(instance, (instance, matchValue) => instance.DifficultyRating = ComparisonFilter.Create(matchValue), matchValue));
+        }
+        
         public override string ToString()
             => GetClause();
     }

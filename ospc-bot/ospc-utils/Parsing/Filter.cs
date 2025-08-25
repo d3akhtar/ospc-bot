@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
 
 namespace OSPC.Utils
 {
@@ -8,7 +9,7 @@ namespace OSPC.Utils
         {
             Comparison comparison = ComparisonConverter.Convert(group[2].Value);
             float value = float.Parse(group[3].Value);
-            return new SingleFilter { Value = value, Comparison = comparison };
+            return new SingleFilter(value, comparison);
         }
         
         public static BetweenFilter GetBetweenFilterFromMatch(GroupCollection a, GroupCollection b)
@@ -16,12 +17,12 @@ namespace OSPC.Utils
             SingleFilter filterA = GetSingleFilterFromMatch(a);
             SingleFilter filterB = GetSingleFilterFromMatch(b);
             
-            if (filterA.Comparison == Comparison.Less && filterB.Comparison == Comparison.Greater) return new() { Min = filterB, Max = filterA };
-            else if (filterA.Comparison == Comparison.LessOrEqual && filterB.Comparison == Comparison.Greater) return new() { Min = filterB, Max = filterA };
-            else if (filterA.Comparison == Comparison.LessOrEqual && filterB.Comparison == Comparison.GreaterOrEqual) return new() { Min = filterB, Max = filterA };
-            else if (filterB.Comparison == Comparison.Less && filterA.Comparison == Comparison.Greater) return new() { Min = filterA, Max = filterB };
-            else if (filterB.Comparison == Comparison.LessOrEqual && filterA.Comparison == Comparison.Greater) return new() { Min = filterA, Max = filterB };
-            else if (filterB.Comparison == Comparison.LessOrEqual && filterA.Comparison == Comparison.GreaterOrEqual) return new() { Min = filterA, Max = filterB };
+            if (filterA.Comparison == Comparison.Less && filterB.Comparison == Comparison.Greater) return new(filterB, filterA);
+            else if (filterA.Comparison == Comparison.LessOrEqual && filterB.Comparison == Comparison.Greater) return new(filterB, filterA);
+            else if (filterA.Comparison == Comparison.LessOrEqual && filterB.Comparison == Comparison.GreaterOrEqual) return new(filterB, filterA);
+            else if (filterB.Comparison == Comparison.Less && filterA.Comparison == Comparison.Greater) return new(filterA, filterB);
+            else if (filterB.Comparison == Comparison.LessOrEqual && filterA.Comparison == Comparison.Greater) return new(filterA, filterB);
+            else if (filterB.Comparison == Comparison.LessOrEqual && filterA.Comparison == Comparison.GreaterOrEqual) return new(filterA, filterB);
             else throw new ArgumentException("Invalid between filter");
         }
 
@@ -37,12 +38,36 @@ namespace OSPC.Utils
                 default: return (false, null);
             }
         }
+
+        public static ComparisonFilter Create(NumberComparisonValue comparisonValue)
+            => comparisonValue.IsBetweenComparison ? ParseBetweenFilter(comparisonValue):ParseSingleFilter(comparisonValue);
+
+        private static SingleFilter ParseSingleFilter(NumberComparisonValue comparisonValue)
+            => new SingleFilter(float.Parse(comparisonValue.Value), ComparisonConverter.Convert(comparisonValue.Comparison));
+
+        private static BetweenFilter ParseBetweenFilter(NumberComparisonValue comparisonValue)
+            => new BetweenFilter(
+                new SingleFilter(float.Parse(comparisonValue.Value), ComparisonConverter.Convert(comparisonValue.Comparison)),
+                new SingleFilter(float.Parse(comparisonValue.SecondaryValue!), ComparisonConverter.Convert(comparisonValue.SecondaryComparison!))
+            );
     }
 
     public class BetweenFilter : ComparisonFilter
     {
-        public required SingleFilter Min { get; set; }
-        public required SingleFilter Max { get; set; }
+        public SingleFilter Min { get; set; }
+        public SingleFilter Max { get; set; }
+
+        public BetweenFilter(SingleFilter a, SingleFilter b)
+        {
+            if (a.Value <= b.Value) {
+                Min = a;
+                Max = b;
+            } else {
+                Min = b;
+                Max = a;
+            }
+        }
+
         public override string ToString()
 		    => $"{Min}{Max}";
     }
@@ -51,6 +76,13 @@ namespace OSPC.Utils
     {
         public float Value { get; set; }
         public Comparison Comparison { get; set; }
+
+        public SingleFilter(float value, Comparison comp)
+        {
+            Value = value;
+            Comparison = comp;
+        }
+        
         public override string ToString()
 		    => $"{Comparison}{Value}";
     }

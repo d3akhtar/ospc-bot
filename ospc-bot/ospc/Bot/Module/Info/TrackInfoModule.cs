@@ -65,13 +65,9 @@ namespace OSPC.Bot.Module.Info
         [Summary("Search for beatmaps in most-played")]
         public async Task Search([Remainder]string input)
         {
-            SearchParams? searchParams = SearchParams.GetSearchParamsFromInput(input);
-            if (searchParams == null) {
-                await ReplyErrorAsync("Invalid input.");
-                return;
-            }
-
-            await ReplyBotCommandResultAsync(await _botCmds.Search(Context.GetOsuContext(), searchParams));
+            var result = SearchParams.Parse(input);
+            if (!result.Successful) await ReplyErrorAsync(result.Error!);
+            else await ReplyBotCommandResultAsync(await _botCmds.Search(Context.GetOsuContext(), result.Value!));
         }
 
         private async Task PageForEmbedUpdated(ulong id)
