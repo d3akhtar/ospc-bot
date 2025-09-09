@@ -4,5 +4,11 @@ namespace OSPC.Utils
     {
         public ulong DiscordUserId { get; set; }
         public ulong ChannelId { get; set; }
+
+        public static ChannelOsuContext Empty => new ChannelOsuContext
+        {
+            DiscordUserId = 0,
+            ChannelId = 0
+        };
     }
 }
