@@ -20,14 +20,14 @@ namespace OSPC.Bot.Command
         private readonly IUserRepository _userRepo;
         private readonly IBeatmapRepository _beatmapRepo;
         private readonly IOsuWebClient _osuWebClient;
-        private readonly PlaycountFetchJobQueue _jobQueue;
+        private readonly IPlaycountFetchJobQueue _jobQueue;
         private readonly IUserSearch _userSearch;
         private const int LIMIT = 25;
 
         public BotCommandService(
             ILogger<BotCommandService> logger,
             IUserRepository userRepo, IBeatmapRepository beatmapRepo, IUserSearch userSearch, 
-            IOsuWebClient osuWebClient, PlaycountFetchJobQueue jobQueue)
+            IOsuWebClient osuWebClient, IPlaycountFetchJobQueue jobQueue)
         {
             _logger = logger;
             _userRepo = userRepo;
@@ -146,7 +146,7 @@ namespace OSPC.Bot.Command
                 User? user = await _userSearch.SearchUser(username, ctx);
                 if (user == null) return CommandResult.Error("User not found!");
                 if (_jobQueue.MapsBeingFetched(user.Id)) {
-                    var usersInQueue = _jobQueue.QueuedUsers.Aggregate("", (acc, curr) => acc += curr + "\n");
+                    var usersInQueue = _jobQueue.GetQueuedUsers().Aggregate("", (acc, curr) => acc += curr + "\n");
                     return CommandResult.Error($"Maps are currently being fetched. Users in queue: \n\n {usersInQueue}");
                 } else {
                     await _jobQueue.EnqueueAsync(user.Id, user.Username);

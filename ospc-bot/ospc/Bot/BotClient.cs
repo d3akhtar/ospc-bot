@@ -104,7 +104,7 @@ namespace OSPC.Bot
                 .AddAppOption<CacheOptions>(_config)
                 .AddSingleton<IOsuWebClient, OsuWebClient>()
                 .AddSingleton<IRedisService, RedisService>()
-                .AddSingleton<PlaycountFetchJobQueue>()
+                .AddSingleton<IPlaycountFetchJobQueue, PlaycountFetchJobQueue>()
                 .AddScoped<DbContext>()
                 .AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IBeatmapRepository, BeatmapRepository>()

@@ -4,7 +4,7 @@ using OSPC.Infrastructure.Http;
 
 namespace OSPC.Infrastructure.Job
 {
-    public class PlaycountFetchJobQueue
+    public class PlaycountFetchJobQueue : IPlaycountFetchJobQueue
     {
         private HashSet<int> _servicedUserIds = new();
         private readonly Channel<int> _userIdChannel;
@@ -43,7 +43,7 @@ namespace OSPC.Infrastructure.Job
         }
 
         public bool MapsBeingFetched(int userId) => _servicedUserIds.Contains(userId);
-        public Queue<string> QueuedUsers => _servicedUsernameQueue;
+        public Queue<string> GetQueuedUsers() => _servicedUsernameQueue;
 
         public void StopLoading() => _cts.Cancel();
     }
