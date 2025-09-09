@@ -29,10 +29,7 @@ namespace OSPC.Utils
             else if (filter is SingleFilter s)
                 return $"AND {table}.{attribute}{CreateExpressionForSingleFilter(s)} ";
             else if (filter is BetweenFilter b)
-                return $@"
-                            AND {table}.{attribute}{CreateExpressionForSingleFilter(b.Min)} 
-                            AND {table}.{attribute}{CreateExpressionForSingleFilter(b.Max)}
-                        ";
+                return $"AND {table}.{attribute}{CreateExpressionForSingleFilter(b.Min)} AND {table}.{attribute}{CreateExpressionForSingleFilter(b.Max)}";
             else return "";
         }
 
