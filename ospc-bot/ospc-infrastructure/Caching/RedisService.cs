@@ -12,15 +12,15 @@ namespace OSPC.Infrastructure.Caching
     {
         private readonly ILogger<RedisService> _logger;
         private readonly IOptions<CacheOptions> _cacheOptions;
-        private readonly ConnectionMultiplexer _connection;
+        private readonly IConnectionMultiplexer _connection;
         private readonly IDatabase _cache;
 
-        public RedisService(ILogger<RedisService> logger, IOptions<CacheOptions> cacheOptions)
-        {
+        public RedisService(ILogger<RedisService> logger, IOptions<CacheOptions> cacheOptions, IConnectionMultiplexer connection)
+        {            
             _logger = logger;
             _cacheOptions = cacheOptions;
-            _connection = ConnectionMultiplexer.Connect(cacheOptions.Value.RedisConnection);
-            _cache = _connection.GetDatabase();
+            _connection = connection;
+            _cache = _connection!.GetDatabase();
         }
 
         public async Task<string?> GetAccessTokenAsync()
@@ -73,6 +73,7 @@ namespace OSPC.Infrastructure.Caching
 
         public async Task<UserRankStatistic?> GetUserRankStatisticAsync(int userId)
         {
+            _logger.LogDebug("Getting user rank statistic for user with id: {UserId}", userId);
             var res = await _cache.StringGetAsync($"user_stat_{userId}");
             if (res.IsNull) {
                 _logger.LogDebug("User rank statistic not found for user with id: {UserId}", userId);

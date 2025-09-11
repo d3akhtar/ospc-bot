@@ -23,6 +23,7 @@ using Serilog;
 using OSPC.Bot.MessageHandlers;
 using OSPC.Infrastructure.Database.CommandFactory;
 using OSPC.Infrastructure.Database.TransactionFactory;
+using StackExchange.Redis;
 
 namespace OSPC.Bot
 {
@@ -102,7 +103,12 @@ namespace OSPC.Bot
                 .AddAppOption<DiscordOptions>(_config)
                 .AddAppOption<OsuWebApiOptions>(_config)
                 .AddAppOption<CacheOptions>(_config)
-                .AddSingleton<IOsuWebClient, OsuWebClient>()
+                .AddScoped<IConnectionMultiplexer, ConnectionMultiplexer>(sp =>
+                {
+                    var cacheOptions = sp.GetRequiredService<IOptions<CacheOptions>>();
+                    return ConnectionMultiplexer.Connect(cacheOptions.Value.RedisConnection); 
+                })
+                .AddSingleton<IOsuWebClient, OsuWebClient>() 
                 .AddSingleton<IRedisService, RedisService>()
                 .AddSingleton<IPlaycountFetchJobQueue, PlaycountFetchJobQueue>()
                 .AddScoped<DbContext>()
