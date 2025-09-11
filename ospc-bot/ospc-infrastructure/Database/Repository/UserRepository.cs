@@ -9,9 +9,9 @@ namespace OSPC.Infrastructure.Database.Repository
     {
         private readonly ILogger<UserRepository> _logger;
         private readonly ICommandFactory _commandFactory;
-        private readonly DbContext _db;
+        private readonly IDatabase _db;
         
-        public UserRepository(ILogger<UserRepository> logger, DbContext db, ICommandFactory commandFactory)
+        public UserRepository(ILogger<UserRepository> logger, IDatabase db, ICommandFactory commandFactory)
         {
             _logger = logger;
             _commandFactory = commandFactory;

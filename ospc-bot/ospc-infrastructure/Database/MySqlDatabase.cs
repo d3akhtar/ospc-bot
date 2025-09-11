@@ -6,13 +6,13 @@ using OSPC.Infrastructure.Caching;
 
 namespace OSPC.Infrastructure.Database
 {
-    public class DbContext
+    public class MySqlDatabase : IDatabase
     {
-        private readonly ILogger<DbContext> _logger;
+        private readonly ILogger<MySqlDatabase> _logger;
         private readonly IOptions<DatabaseOptions> _databaseOptions;
         private readonly IRedisService _redis;
 
-        public DbContext(ILogger<DbContext> logger, IOptions<DatabaseOptions> databaseOptions, IRedisService redis)
+        public MySqlDatabase(ILogger<MySqlDatabase> logger, IOptions<DatabaseOptions> databaseOptions, IRedisService redis)
         {
             _logger = logger;
             _databaseOptions = databaseOptions;

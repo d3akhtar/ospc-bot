@@ -24,6 +24,7 @@ using OSPC.Bot.MessageHandlers;
 using OSPC.Infrastructure.Database.CommandFactory;
 using OSPC.Infrastructure.Database.TransactionFactory;
 using StackExchange.Redis;
+using IDatabase = OSPC.Infrastructure.Database.IDatabase;
 
 namespace OSPC.Bot
 {
@@ -111,7 +112,7 @@ namespace OSPC.Bot
                 .AddSingleton<IOsuWebClient, OsuWebClient>() 
                 .AddSingleton<IRedisService, RedisService>()
                 .AddSingleton<IPlaycountFetchJobQueue, PlaycountFetchJobQueue>()
-                .AddScoped<DbContext>()
+                .AddScoped<IDatabase, MySqlDatabase>()
                 .AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IBeatmapRepository, BeatmapRepository>()
                 .AddScoped<IOsuWebClient, OsuWebClient>()

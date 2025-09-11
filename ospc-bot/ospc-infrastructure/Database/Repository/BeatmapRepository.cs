@@ -11,11 +11,11 @@ namespace OSPC.Infrastructure.Database.Repository
     public class BeatmapRepository : IBeatmapRepository
     {
         private readonly ILogger<BeatmapRepository> _logger;
-        private readonly DbContext _db;
+        private readonly IDatabase _db;
         private readonly ICommandFactory _commandFactory;
         private readonly ITransactionFactory _transactionFactory;
 
-        public BeatmapRepository(ILogger<BeatmapRepository> logger, DbContext db, ICommandFactory commandFactory, ITransactionFactory transactionFactory)
+        public BeatmapRepository(ILogger<BeatmapRepository> logger, IDatabase db, ICommandFactory commandFactory, ITransactionFactory transactionFactory)
         {
             _logger = logger;
             _db = db;
