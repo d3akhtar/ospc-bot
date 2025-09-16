@@ -484,3 +484,4 @@ $RECYCLE.BIN/
 *.swp
 
 maps_*.txt
+appsettings.json
