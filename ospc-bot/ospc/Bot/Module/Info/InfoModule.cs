@@ -16,10 +16,10 @@ namespace OSPC.Bot.Module.Info
 			else await ReplyCommandResultAsync(result);
 		}
 
-		public async Task ReplyErrorAsync(string message)
+		public async Task ReplyErrorAsync(Error error)
 		{
-			_logger.LogInformation("Replying to user with an error message: {ErrorMessage}", message);
-			await ReplyAsync(embed: Embeded.BuildErrorEmbed(message));
+			_logger.LogInformation("Replying to user with error: {@Error}", error);
+			await ReplyAsync(embed: Embeded.BuildErrorEmbed(error));
 		}
 
 		private async Task ReplyCommandResultAsync(CommandResult result)

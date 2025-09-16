@@ -44,18 +44,18 @@ namespace OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues
 			switch (Comparison) {
 				case "<":
 				case "<=": {
-					if (SecondaryComparison is {} c && c.Contains('<')) return $"Cannot have two comparisons containing \'<\'";
+					if (SecondaryComparison is {} c && c.Contains('<')) return Errors.Parsing($"Cannot have two comparisons containing \'<\'");
 					break;
 				}
 				case ">":
 				case ">=": {
-					if (SecondaryComparison is {} c && c.Contains('>')) return $"Cannot have two comparisons containing \'>\'";
+					if (SecondaryComparison is {} c && c.Contains('>')) return Errors.Parsing($"Cannot have two comparisons containing \'>\'");
 					break;
 				}
 				case "=": 
-					if (SecondaryComparison is {}) return $"Cannot have another comparisons alongside an \'=\' comparison";
+					if (SecondaryComparison is {}) return Errors.Parsing($"Cannot have another comparisons alongside an \'=\' comparison");
 					break;
-				default: return $"Invalid comparison: {Comparison}";
+				default: return Errors.Parsing($"Invalid comparison: {Comparison}");
 			}
 		
 			return Result.Success();

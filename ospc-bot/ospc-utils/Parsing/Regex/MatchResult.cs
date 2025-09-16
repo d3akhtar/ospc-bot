@@ -16,6 +16,12 @@ namespace OSPC.Utils.Parsing.RegularExpressions
 				IsError = true,
 				ErrorMessage = message
 			};
+
+		public static MatchResult Error(Error error)
+			=> new() {
+				IsError = true,
+				ErrorMessage = error.Message
+			};
 	
 		public static MatchResult Success(List<NamedGroupMatchValue> matchedValues, string cleaned)
 		{

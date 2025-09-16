@@ -102,6 +102,9 @@ namespace OSPC.Bot.Component
                 .WithColor(Color.Red)
                 .Build();
 
+        public static Embed BuildErrorEmbed(Error error)
+            => BuildErrorEmbed(GetEmbedMessageForError(error));
+
         public static Embed BuildSuccessEmbed(string message)
             => GetSuccessEmbedBaseBuilder(message).Build();
 
@@ -170,6 +173,15 @@ namespace OSPC.Bot.Component
                 default: return BuildErrorEmbed($"Command: {command} doesn't exist!");
             }
         }
+
+        private static string GetEmbedMessageForError(Error error)
+            => error.Type switch
+            {
+                ErrorType.InvalidArguments => "Invalid arguments were specified, please see =help {command} for correct format",
+                ErrorType.Parsing => $"An error occurred during parsing: {error.Message}",
+                ErrorType.NotFound => error.Message ?? "Couldn't find what you were looking for",
+                _  => "An unexpected error occured"
+            };
 
         private static Embed BuildLoadCommandHelpEmbed()
             => new EmbedBuilder()

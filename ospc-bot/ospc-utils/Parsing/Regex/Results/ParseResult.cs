@@ -4,8 +4,8 @@ namespace OSPC.Utils.Parsing.RegularExpressions.Results
 	{
 		public string LeftoverInput { get; }
 
-		protected ParseResult(string leftoverInput) : base(true, string.Empty) => LeftoverInput = leftoverInput;
-		protected ParseResult(string leftoverInput, string error) : base(false, error) => LeftoverInput = leftoverInput;
+		protected ParseResult(string leftoverInput) : base(true, Error: null) => LeftoverInput = leftoverInput;
+		protected ParseResult(string leftoverInput, string error) : base(false, Errors.Parsing(error)) => LeftoverInput = leftoverInput;
 	}
 
 	public record ParseResult<T> : ParseResult

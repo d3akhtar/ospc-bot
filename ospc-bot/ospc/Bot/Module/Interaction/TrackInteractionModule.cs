@@ -52,12 +52,12 @@ namespace OSPC.Bot.Module.Interaction
         {
             var beatmapFilterParseResult =  BeatmapFilter.Parse(beatmapFilterStr);
             if (!beatmapFilterParseResult.Successful) {
-                await RespondErrorAsync(beatmapFilterParseResult.Error);
+                await RespondErrorAsync(beatmapFilterParseResult.Error!);
                 return;
             }
 
-            if (!string.IsNullOrEmpty(username) && !RegexPatterns.StrictUsernameRegex.IsMatch(username)) await RespondErrorAsync("Invalid username format!");
-            else if (UnfilledQuery(query, artist, title, playcount, comparison)) await RespondErrorAsync("Either fill only the query, or fill one or both of artist and title");  
+            if (!string.IsNullOrEmpty(username) && !RegexPatterns.StrictUsernameRegex.IsMatch(username)) await RespondErrorAsync(Errors.Parsing("Invalid username format!"));
+            else if (UnfilledQuery(query, artist, title, playcount, comparison)) await RespondErrorAsync(Errors.InvalidArguments("Either fill only the query, or fill one or both of artist and title"));  
             else {
                 SearchParams searchParams = new() {
                      Username = username,

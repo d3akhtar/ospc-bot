@@ -17,8 +17,8 @@ namespace OSPC.Bot.Module.Interaction
 			else await RespondCommandResultAsync(result);
 		}
 
-		public async Task RespondErrorAsync(string message)
-			=> await RespondAsync(embed: Embeded.BuildErrorEmbed(message));
+		public async Task RespondErrorAsync(Error error)
+			=> await RespondAsync(embed: Embeded.BuildErrorEmbed(error));
 
 		private async Task RespondCommandResultAsync(CommandResult result)
 		{

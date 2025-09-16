@@ -22,7 +22,7 @@ namespace OSPC.Utils.Parsing
             foreach (var setter in _parsableSetters)
             {
                 var result = setter(value, input);
-                if (!result.Successful) return ParseResult<T>.Fail(result.LeftoverInput, result.Error);
+                if (!result.Successful) return ParseResult<T>.Fail(result.LeftoverInput, result.Error!.Message ?? "Error occured during parsing");
 				input = result.LeftoverInput;
             }
             
@@ -57,7 +57,7 @@ namespace OSPC.Utils.Parsing
             if (matchValue is M value) {
 				setter(instance, value);
                 return Result.Success();
-            } else return $"Invalid match value for {matchValue.Name}";
+            } else return Errors.Parsing("Invalid match value for {matchValue.Name}");
         }
 	}
 }

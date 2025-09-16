@@ -48,7 +48,7 @@ namespace OSPC.Bot.Module.Info
             if (TryParseUsernameOrBeatmap(usernameOrBeatmap, out string username, out int beatmapId))
                 await ReplyBotCommandResultAsync(await _botCmds.GetPlaycount(Context.GetOsuContext(), username, beatmapId));
             else
-                await ReplyErrorAsync("Invalid parameters");
+                await ReplyErrorAsync(Errors.Parsing("Invalid username or beatmap link specified, see more info about username/beatmap link format with `=help pc`"));
         }
 
         [Command("pc")]

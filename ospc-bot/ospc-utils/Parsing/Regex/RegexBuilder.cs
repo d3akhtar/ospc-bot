@@ -37,7 +37,7 @@ namespace OSPC.Utils.Parsing.RegularExpressions
 				var matches = Regex.Matches(input);
 			
 				foreach (var limitation in Limitations.Where(l => !l.NeedsOtherGroups)) {
-					if (!limitation.Passes(matches)) return limitation.ErrorMessage();
+					if (!limitation.Passes(matches)) return Errors.Parsing(limitation.ErrorMessage());
 				}
 			
 				if (matches.Count > 0) {
@@ -68,7 +68,7 @@ namespace OSPC.Utils.Parsing.RegularExpressions
 					
 						return value;
 					}
-					default: return "Cannot have more than 2 comparisons for a single attribute";
+					default: return Errors.Parsing("Cannot have more than 2 comparisons for a single attribute");
 				}
 			}
 		}
