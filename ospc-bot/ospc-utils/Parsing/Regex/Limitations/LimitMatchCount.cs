@@ -6,11 +6,11 @@ namespace OSPC.Utils.Parsing.RegularExpressions.Limitations
 	public class LimitMatchCount : IRegexGroupLimitation
 	{
 		public bool NeedsOtherGroups => false;
-		public string GroupName { get; set; }
+		public string GroupName { get; set; } = "[Unnamed]";
 		public int MaxMatchCount { get; set; }
 
 		public bool Passes(List<Group> groups)
-		{	
+		{
 			var succeedingGroups = groups.Where(g => g.Name == GroupName).ToList();
 			return succeedingGroups.Count <= MaxMatchCount;
 		}

@@ -44,7 +44,7 @@ namespace OSPC.Utils.Parsing.RegularExpressions
 					Success = true;
 					if (GroupType == RegexGroupType.Comparison) {
 						var numberComparisonValueResult = GetNumberComparisonValueFromMatchCollection(matches);
-						if (!numberComparisonValueResult.Successful) return numberComparisonValueResult.Error;
+						if (!numberComparisonValueResult.Successful) return numberComparisonValueResult.Error!;
 						else MatchValue = numberComparisonValueResult.Value!;
 					} else MatchValue = new StringValue(Name, matches[0].Groups[Name].Value);
 				}
@@ -64,7 +64,7 @@ namespace OSPC.Utils.Parsing.RegularExpressions
 							matches[1].Groups[Name + "_comparison"].Value, matches[1].Groups[Name + "_value"].Value);
 					
 						var validationResult = value.ValidNumberComparisonValue();
-						if (!validationResult.Successful) return validationResult.Error;
+						if (!validationResult.Successful) return validationResult.Error!;
 					
 						return value;
 					}
@@ -179,7 +179,7 @@ namespace OSPC.Utils.Parsing.RegularExpressions
 					var matchCollection = regexGroup.Match(input);
 					input = regexGroup.Clean(input);
 				
-					if (!matchCollection.Successful) return MatchResult.Error(matchCollection.Error);
+					if (!matchCollection.Successful) return MatchResult.Error(matchCollection.Error!);
 				
 					if (regexGroup.Success) {
 						matchedValues.Add(regexGroup.MatchValue);

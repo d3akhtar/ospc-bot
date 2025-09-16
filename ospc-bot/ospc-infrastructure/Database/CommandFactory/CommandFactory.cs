@@ -159,7 +159,7 @@ namespace OSPC.Infrastructure.Database.CommandFactory
             bool generalQuery = string.IsNullOrEmpty(searchParams.Artist) && string.IsNullOrEmpty(searchParams.Title);
             string artistConcat = generalQuery ? (searchParams.Exact && searchParams.Query != "" ? "":"%") : (searchParams.Exact && searchParams.Artist != "" ? "":"%");
             string titleConcat = generalQuery ? (searchParams.Exact && searchParams.Query != "" ? "":"%") : (searchParams.Exact && searchParams.Title != "" ? "":"%");
-            string countComparison = ComparisonConverter.CreateComparisonClause(searchParams.Playcount, "BeatmapPlaycounts", "Count");
+            string countComparison = ComparisonConverter.CreateComparisonClause(searchParams.Playcount!, "BeatmapPlaycounts", "Count");
             string query = $@"
                     SELECT {(countQuery ? "COUNT(BeatmapPlaycounts.Count)":"BeatmapPlaycounts.*,Beatmaps.Id,Beatmaps.Version,Beatmaps.DifficultyRating,Beatmaps.BeatmapSetId,BeatmapSet.*")}
                     FROM BeatmapPlaycounts

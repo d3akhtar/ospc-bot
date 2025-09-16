@@ -34,7 +34,7 @@ namespace OSPC.Infrastructure.Database.TransactionFactory
 	                await command.ExecuteNonQueryAsync();
 				}
 			} catch (Exception ex) {
-				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}");
+				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}", query);
 				throw;
 			}
 
@@ -75,7 +75,7 @@ namespace OSPC.Infrastructure.Database.TransactionFactory
 	                await command.ExecuteNonQueryAsync();
 	            }
 			} catch (Exception ex) {
-				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}");
+				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}", query);
 				throw;
 			}
 
@@ -106,7 +106,7 @@ namespace OSPC.Infrastructure.Database.TransactionFactory
 	                await command.ExecuteNonQueryAsync();
 	            }
 			} catch (Exception ex) {
-				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}");
+				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}", query);
 				throw;
 			}
 

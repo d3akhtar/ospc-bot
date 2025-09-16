@@ -3,6 +3,7 @@ using OSPC.Bot.Context;
 using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
+using OSPC.Utils;
 using OSPC.Utils.Parsing;
 
 namespace OSPC.Bot.Component
@@ -16,7 +17,7 @@ namespace OSPC.Bot.Component
 
         public static void CreatePlaycountListEmbed(PlaycountEmbedContext ctx)
         {
-            ActiveEmbeds.Add(ctx.Message.Id, ctx);
+            ActiveEmbeds.Add(ctx.Message!.Id, ctx);
             StartTask(ctx.Message);
         }
         public static void StartTask(IUserMessage message) {
@@ -89,9 +90,9 @@ namespace OSPC.Bot.Component
                     .WithUrl($"https://osu.ppy.sh/users/{user.Id}")
                     .WithIconUrl($"https://flagcdn.com/w40/{user.CountryCode.ToLower()}.png")
                 )
-                .WithImageUrl(beatmapPlaycount.BeatmapSet.Covers.SlimCover2x)
+                .WithImageUrl(beatmapPlaycount.BeatmapSet!.Covers.SlimCover2x)
                 .WithTitle($"{user.Username} has played this map {beatmapPlaycount.Count} times")
-                .WithDescription($"[{beatmapPlaycount.BeatmapSet.Artist} - {beatmapPlaycount.BeatmapSet.Title} [{beatmapPlaycount.Beatmap.Version}]](https://osu.ppy.sh/beatmaps/{beatmapPlaycount.BeatmapId})")
+                .WithDescription($"[{beatmapPlaycount.BeatmapSet.Artist} - {beatmapPlaycount.BeatmapSet.Title} [{beatmapPlaycount.Beatmap!.Version}]](https://osu.ppy.sh/beatmaps/{beatmapPlaycount.BeatmapId})")
                 .WithColor(Color.Green)
                 .Build();
         }
@@ -135,7 +136,7 @@ namespace OSPC.Bot.Component
         {
             if (ActiveEmbeds.ContainsKey(id)){
                 PlaycountEmbedContext context = ActiveEmbeds[id];
-                int pageNumber = BotClient.Instance.CurrentPageForEmbed[context.Message.Id];
+                int pageNumber = BotClient.Instance.CurrentPageForEmbed[context.Message!.Id];
                 List<BeatmapPlaycount> mostPlayed = await QueryPlaycountBasedOffEmbedContext(
                     osuWebClient, beatmapRepo, context, pageNumber
                 );
@@ -327,7 +328,7 @@ namespace OSPC.Bot.Component
                 (context.User.Id, LIMIT, LIMIT * (pageNumber-1));
             } else {
                 return await beatmapRepo.FilterBeatmapPlaycountsForUser(
-                    context.SearchParams,
+                    context.SearchParams!,
                     context.User.Id, 
                     LIMIT, 
                     pageNumber

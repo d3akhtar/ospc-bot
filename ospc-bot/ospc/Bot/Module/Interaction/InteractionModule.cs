@@ -3,12 +3,14 @@ using Discord.Interactions;
 using Microsoft.Extensions.Logging;
 using OSPC.Bot.Command.Result;
 using OSPC.Bot.Component;
+using OSPC.Utils;
 using SearchResult = OSPC.Bot.Command.Result.SearchResult;
 
 namespace OSPC.Bot.Module.Interaction
 {
 	public class InteractionModule : InteractionModuleBase<SocketInteractionContext>
-	{		
+	{
+		#pragma warning disable CS8625
         protected ILogger _logger = default;
 		
 		public async Task RespondBotCommandResultAsync(CommandResult result)
