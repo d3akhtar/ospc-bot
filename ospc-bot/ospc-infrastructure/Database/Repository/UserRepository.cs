@@ -29,8 +29,11 @@ namespace OSPC.Infrastructure.Database.Repository
             ];
             return await _db.ExecuteInsertAsync(
                 invalidatedKeys,
-                async conn
-                    => await _commandFactory.CreateAddDiscordPlayerMappingCommand(conn, discordUserId, playerUserId).ExecuteNonQueryAsync() > 0);
+                async (conn) =>
+                {
+                    var command = _commandFactory.CreateAddDiscordPlayerMappingCommand(conn, discordUserId, playerUserId);
+                    return command is {} c && (await c.ExecuteNonQueryAsync() > 0);
+                });
         }
 
         public async Task<DiscordPlayer?> GetPlayerInfoFromDiscordId(ulong discordUserId)
@@ -40,8 +43,11 @@ namespace OSPC.Infrastructure.Database.Repository
             string key = CacheKey.ConvertTypeToKey<DiscordPlayer>((discordUserId, "discId"));
             return await _db.ExecuteCommandAsync<DiscordPlayer?>(key, async (conn) =>
             {
-                using var reader = await _commandFactory.CreateGetPlayerInfoFromDiscordIdCommand(conn, discordUserId).ExecuteReaderAsync();
-                return reader.Read() ? reader.ReadDiscordPlayerMapping():null;
+                var command = _commandFactory.CreateGetPlayerInfoFromDiscordIdCommand(conn, discordUserId);
+                if (command is {} c ) {
+                    using var reader = await c.ExecuteReaderAsync();
+                    return reader.Read() ? reader.ReadDiscordPlayerMapping():null;
+                } else return default;
             });
         }
 
@@ -49,8 +55,11 @@ namespace OSPC.Infrastructure.Database.Repository
         {
             _logger.LogDebug("Adding user: {@User}", user);
             
-            return await _db.ExecuteAsync<bool>(async conn
-                => await _commandFactory.CreateAddUserCommand(conn, user).ExecuteNonQueryAsync() > 0);
+            return await _db.ExecuteAsync<bool>(async (conn) =>
+            {
+                var command = _commandFactory.CreateAddUserCommand(conn, user);
+                return command is {} c && (await c.ExecuteNonQueryAsync()) > 0;
+            });
         }
 
         public async Task<User?> GetUserById(int id)
@@ -60,8 +69,11 @@ namespace OSPC.Infrastructure.Database.Repository
             string key = CacheKey.ConvertTypeToKey<User>((id, "osuid"));
             return await _db.ExecuteCommandAsync<User?>(key, async (conn) =>
             {
-                using var reader = await _commandFactory.CreateGetUserByIdCommand(conn, id).ExecuteReaderAsync();
-                return reader.Read() ? reader.ReadUser():null;
+                using var command = _commandFactory.CreateGetUserByIdCommand(conn, id);
+                if (command is {} c) {
+                    using var reader = await c.ExecuteReaderAsync();
+                    return reader.Read() ? reader.ReadUser():null;
+                } else return default;
             });
         }
 
@@ -72,8 +84,11 @@ namespace OSPC.Infrastructure.Database.Repository
             string key = CacheKey.ConvertTypeToKey<User>((username, "osuign"));
             return await _db.ExecuteCommandAsync<User?>(key, async (conn) =>
             {
-                using var reader = await _commandFactory.CreateGetUserByUsernameCommand(conn, username).ExecuteReaderAsync();
-                return reader.Read() ? reader.ReadUser():null;
+                var command = _commandFactory.CreateGetUserByUsernameCommand(conn, username);
+                if (command is {} c) {
+                    using var reader = await c.ExecuteReaderAsync();
+                    return reader.Read() ? reader.ReadUser():null;
+                } else return default;
             });
         }
 
@@ -84,8 +99,11 @@ namespace OSPC.Infrastructure.Database.Repository
             string key = CacheKey.ConvertTypeToKey<User>((discordUserId, "discId"));
             return await _db.ExecuteCommandAsync<User?>(key, async (conn) =>
             {
-                using var reader = await _commandFactory.CreateGetUserWithDiscordIdCommand(conn, discordUserId).ExecuteReaderAsync();
-                return reader.Read() ? reader.ReadUser():null;
+                var command = _commandFactory.CreateGetUserWithDiscordIdCommand(conn, discordUserId);
+                if (command is {} c) {
+                    using var reader = await c.ExecuteReaderAsync();
+                    return reader.Read() ? reader.ReadUser():null;
+                } else return default;
             });
         }
     }

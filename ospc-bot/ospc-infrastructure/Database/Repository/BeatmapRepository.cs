@@ -34,7 +34,7 @@ namespace OSPC.Infrastructure.Database.Repository
                     await transaction.CommitAsync();
                 } catch (Exception e) {
                     _logger.LogError(e, "Error while adding beatmap playcounts, rolling back transaction");
-                    await transaction.RollbackAsync();
+                    if (transaction is not null) await transaction.RollbackAsync();
                 }
             });
         }
@@ -50,7 +50,7 @@ namespace OSPC.Infrastructure.Database.Repository
                     await transaction.CommitAsync();
                 } catch (Exception e) {
                     _logger.LogError(e, "Error while adding beatmaps, rolling back transaction");
-                    await transaction.RollbackAsync();
+                    if (transaction is not null) await transaction.RollbackAsync();
                 }
             });
         }
@@ -66,7 +66,7 @@ namespace OSPC.Infrastructure.Database.Repository
                     await transaction.CommitAsync();
                 } catch (Exception e) {
                     _logger.LogError(e, "Error while adding beatmap sets, rolling back transaction");
-                    await transaction.RollbackAsync();
+                    if (transaction is not null) await transaction.RollbackAsync();
                 }
             });
         }
@@ -92,6 +92,7 @@ namespace OSPC.Infrastructure.Database.Repository
             {
                 List<BeatmapPlaycount> res = new();
                 using var command = _commandFactory.CreateBeatmapPlaycountFilterCommand(conn, searchParams, userId, pageSize, pageNumber);
+                if (command is null) return [];
                 var reader = await command.ExecuteReaderAsync();
                 while (reader.Read()) res.Add(reader.ReadBeatmapPlaycountInclude());
                 reader.Close();
@@ -108,6 +109,7 @@ namespace OSPC.Infrastructure.Database.Repository
             {
                 Beatmap? res = null;
                 using var command = _commandFactory.CreateGetBeatmapByIdCommand(conn, id);
+                if (command is null) return default;
                 var reader = await command.ExecuteReaderAsync();
                 if (reader.Read()) res = reader.ReadBeatmap();
                 reader.Close();
@@ -127,6 +129,7 @@ namespace OSPC.Infrastructure.Database.Repository
             {
                 BeatmapSet? res = null;
                 using var command = _commandFactory.CreateGetBeatmapSetByIdCommand(conn, id);
+                if (command is null) return default;
                 var reader = await command.ExecuteReaderAsync();
                 if (reader.Read()) res = reader.ReadBeatmapSet();
                 reader.Close();
@@ -143,6 +146,7 @@ namespace OSPC.Infrastructure.Database.Repository
             {
                 int? res = null;
                 using var command = _commandFactory.CreateGetPlaycountForBeatmapCommand(conn, userId, beatmapId);
+                if (command is null) return default;
                 var reader = await command.ExecuteReaderAsync();
                 if (reader.Read()) res = reader.GetInt32(0);
                 reader.Close();
@@ -159,6 +163,7 @@ namespace OSPC.Infrastructure.Database.Repository
             {
                 BeatmapPlaycount? res = null;
                 using var command = _commandFactory.CreateGetBeatmapPlaycountForUserCommand(conn, userId, beatmapId);
+                if (command is null) return default;
                 var reader = await command.ExecuteReaderAsync();
                 if (reader.Read()) res = reader.ReadBeatmapPlaycountInclude();
                 reader.Close();
@@ -171,10 +176,11 @@ namespace OSPC.Infrastructure.Database.Repository
             _logger.LogDebug("Updating channelId: {ChannelId} last referenced beatmapId: {BeatmapId}", channelId, beatmapId);
 
             List<string> invalidatedKeys = [CacheKey.ConvertTypeToKey<int>((channelId, "channelId"))];
-            await _db.ExecuteInsertAsync(invalidatedKeys, async conn
-                    => await _commandFactory
-                                .CreateUpdateReferencedBeatmapIdForChannelCommand(conn, channelId, beatmapId)
-                                .ExecuteNonQueryAsync() > 0);
+            await _db.ExecuteInsertAsync(invalidatedKeys, async (conn) =>
+            {
+                using var command = _commandFactory.CreateUpdateReferencedBeatmapIdForChannelCommand(conn, channelId, beatmapId);
+                return command is {} && await command.ExecuteNonQueryAsync() > 0;
+            });
         }
 
         public async Task<int?> GetReferencedBeatmapIdForChannel(ulong channelId)
@@ -186,6 +192,7 @@ namespace OSPC.Infrastructure.Database.Repository
                 async (conn) => {
                     int res = -1;
                     using var command = _commandFactory.CreateGetReferencedBeatmapIdForChannelCommand(conn, channelId);
+                    if (command is null) return null;
                     var reader = await command.ExecuteReaderAsync();
                     if (reader.Read()) res = reader.GetInt32(0);
                     reader.Close();
@@ -206,10 +213,11 @@ namespace OSPC.Infrastructure.Database.Repository
                     (searchParams.Exact, "exact"),
                     (searchParams.BeatmapFilter, "beatmapFilter")
             );
-            return (int)await _db.ExecuteCommandAsync<int?>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<int>(key, async (conn) =>
             {
-                int? res = null;
+                int res = 0;
                 using var command = _commandFactory.CreateBeatmapPlaycountFilterCommand(conn, searchParams, userId);
+                if (command is null) return -1;
                 var reader = await command.ExecuteReaderAsync();
                 if (reader.Read()) res = reader.GetInt32(0);
                 reader.Close();
