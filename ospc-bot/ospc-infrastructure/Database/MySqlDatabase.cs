@@ -54,6 +54,16 @@ namespace OSPC.Infrastructure.Database
             }
         }
 
+        public async Task CommitTransactionAsync(MySqlTransaction transaction)
+        {
+            try {
+                await transaction.CommitAsync();
+            } catch (Exception e) {
+                _logger.LogError(e, "Error while commiting, rolling back transaction");
+                await transaction.RollbackAsync();
+            }
+        }
+
         public async Task<bool> ExecuteInsertAsync(List<string> invalidatedKeys, Func<MySqlConnection, Task<bool>> action)
         {
             _logger.LogDebug("Executing MySQL insert command");

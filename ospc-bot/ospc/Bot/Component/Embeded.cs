@@ -327,12 +327,15 @@ namespace OSPC.Bot.Component
                 return await osuWebClient.GetBeatmapPlaycountsForUser
                 (context.User.Id, LIMIT, LIMIT * (pageNumber-1));
             } else {
-                return await beatmapRepo.FilterBeatmapPlaycountsForUser(
+                var filterResult = await beatmapRepo.FilterBeatmapPlaycountsForUser(
                     context.SearchParams!,
                     context.User.Id, 
                     LIMIT, 
                     pageNumber
                 );
+
+                if (!filterResult.Successful) return [];
+                else return filterResult.Value!;
             }
         }
     }

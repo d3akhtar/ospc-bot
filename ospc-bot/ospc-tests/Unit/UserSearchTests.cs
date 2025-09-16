@@ -19,8 +19,8 @@ namespace OSPC.Tests.Unit
 			var mockUser = new User { Id = 1, Username = "opensand", CountryCode = "CA" };
 
 			_userRepoMock = new();
-			_userRepoMock.Setup(u => u.GetUserByUsername(It.IsAny<string>())).ReturnsAsync(mockUser);
-			_userRepoMock.Setup(u => u.GetUserWithDiscordId(It.IsAny<ulong>())).ReturnsAsync(mockUser);
+			_userRepoMock.Setup(u => u.GetUserByUsername(It.IsAny<string>())).ReturnsAsync(Result<User>.Success(mockUser));
+			_userRepoMock.Setup(u => u.GetUserWithDiscordId(It.IsAny<ulong>())).ReturnsAsync(Result<User>.Success(mockUser));
 
 			_osuWebClientMock = new();
 			_osuWebClientMock.Setup(o => o.FindUserWithUsername(It.IsAny<string>())).ReturnsAsync(mockUser);
@@ -53,7 +53,7 @@ namespace OSPC.Tests.Unit
 		[Fact]
 		public async Task SearchUsingOsuWebClient1()
 		{
-			_userRepoMock.Setup(u => u.GetUserByUsername(It.IsAny<string>())).ReturnsAsync((User)null!);
+			_userRepoMock.Setup(u => u.GetUserByUsername(It.IsAny<string>())).ReturnsAsync(Result<User>.Fail(Errors.Unspecified("Mock")));
 			
 			var result = await _userSearch.SearchUser("opensand");
 
@@ -67,7 +67,7 @@ namespace OSPC.Tests.Unit
 		[Fact]
 		public async Task SearchUsingOsuWebClient2()
 		{
-			_userRepoMock.Setup(u => u.GetUserWithDiscordId(It.IsAny<ulong>())).ReturnsAsync((User)null!);
+			_userRepoMock.Setup(u => u.GetUserWithDiscordId(It.IsAny<ulong>())).ReturnsAsync(Result<User>.Fail(Errors.Unspecified("Mock")));
 			
 			var result = await _userSearch.SearchUser(User.Unspecified, new ChannelOsuContext { DiscordUserId = 1, ChannelId = 1 });
 
@@ -81,7 +81,7 @@ namespace OSPC.Tests.Unit
 		[Fact]
 		public async Task SearchUsingOsuWebClient3()
 		{
-			_userRepoMock.Setup(u => u.GetUserByUsername(It.IsAny<string>())).ReturnsAsync((User)null!);
+			_userRepoMock.Setup(u => u.GetUserByUsername(It.IsAny<string>())).ReturnsAsync(Result<User>.Fail(Errors.Unspecified("Mock")));
 			_osuWebClientMock.Setup(o => o.FindUserWithUsername(It.IsAny<string>())).ReturnsAsync((User)null!);
 			
 			var result = await _userSearch.SearchUser(User.Unspecified);
@@ -90,7 +90,9 @@ namespace OSPC.Tests.Unit
 			_userRepoMock.Verify(u => u.GetUserWithDiscordId(It.IsAny<ulong>()), Times.Never);
 			_osuWebClientMock.Verify(o => o.FindUserWithUsername(It.IsAny<string>()), Times.Exactly(1));
 			_userRepoMock.Verify(u => u.AddUser(It.IsAny<User>()), Times.Never);
-			Assert.Null(result);
+
+			Assert.False(result.Successful);
+			Assert.Null(result.Value);
 		}
 	}
 }

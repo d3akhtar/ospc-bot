@@ -1,6 +1,7 @@
 
 using Discord;
 using OSPC.Bot.Component;
+using OSPC.Utils;
 
 namespace OSPC.Bot.Command.Result
 {
@@ -14,6 +15,9 @@ namespace OSPC.Bot.Command.Result
 				Embed = Embeded.BuildErrorEmbed(message),
 				Successful = false
 			};
+
+		public static CommandResult Error(Error error)
+			=> Error(error.Message!);
 
 		public static CommandResult Success(Embed embed)
 			=> new() {

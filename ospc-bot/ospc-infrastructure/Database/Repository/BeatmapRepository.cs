@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.CommandFactory;
 using OSPC.Infrastructure.Database.TransactionFactory;
+using OSPC.Utils;
 using OSPC.Utils.Cache;
 using OSPC.Utils.Parsing;
 
@@ -28,14 +29,10 @@ namespace OSPC.Infrastructure.Database.Repository
             _logger.LogDebug("Adding {Count} new beatmap playcounts", beatmapPlaycounts.Count);
             
             await _db.ExecuteAsync(async conn => 
-            {               
-                using var transaction = await _transactionFactory.CreateAddBeatmapPlaycountTransaction(conn, beatmapPlaycounts);
-                try {                  
-                    await transaction.CommitAsync();
-                } catch (Exception e) {
-                    _logger.LogError(e, "Error while adding beatmap playcounts, rolling back transaction");
-                    if (transaction is not null) await transaction.RollbackAsync();
-                }
+            {   
+                var result = await _transactionFactory.CreateAddBeatmapPlaycountTransaction(conn, beatmapPlaycounts);
+                if (!result.Successful) return;
+                else await _db.CommitTransactionAsync(result.Value!);
             });
         }
 
@@ -45,13 +42,9 @@ namespace OSPC.Infrastructure.Database.Repository
             
             await _db.ExecuteAsync(async conn =>
             {
-                using var transaction = await _transactionFactory.CreateAddBeatmapTransaction(conn, beatmaps);
-                try {
-                    await transaction.CommitAsync();
-                } catch (Exception e) {
-                    _logger.LogError(e, "Error while adding beatmaps, rolling back transaction");
-                    if (transaction is not null) await transaction.RollbackAsync();
-                }
+                var result = await _transactionFactory.CreateAddBeatmapTransaction(conn, beatmaps);
+                if (!result.Successful) return;
+                else await _db.CommitTransactionAsync(result.Value!);
             });
         }
 
@@ -61,17 +54,13 @@ namespace OSPC.Infrastructure.Database.Repository
             
             await _db.ExecuteAsync(async conn =>
             {            
-                using var transaction = await _transactionFactory.CreateAddBeatmapSetTransaction(conn, beatmapSets);
-                try {
-                    await transaction.CommitAsync();
-                } catch (Exception e) {
-                    _logger.LogError(e, "Error while adding beatmap sets, rolling back transaction");
-                    if (transaction is not null) await transaction.RollbackAsync();
-                }
+                var result = await _transactionFactory.CreateAddBeatmapSetTransaction(conn, beatmapSets);
+                if (!result.Successful) return;
+                else await _db.CommitTransactionAsync(result.Value!);
             });
         }
 
-        public async Task<List<BeatmapPlaycount>> FilterBeatmapPlaycountsForUser
+        public async Task<Result<List<BeatmapPlaycount>>> FilterBeatmapPlaycountsForUser
             (SearchParams searchParams, int userId, int pageSize, int pageNumber)
         {
             _logger.LogDebug("Filtering beatmap playcounts using searchParams: {@SearchParams}", searchParams);
@@ -88,86 +77,93 @@ namespace OSPC.Infrastructure.Database.Repository
                     (searchParams.BeatmapFilter, "beatmapFilter")
             );
 
-            return await _db.ExecuteCommandAsync<List<BeatmapPlaycount>>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<Result<List<BeatmapPlaycount>>>(key, async (conn) =>
             {
                 List<BeatmapPlaycount> res = new();
-                using var command = _commandFactory.CreateBeatmapPlaycountFilterCommand(conn, searchParams, userId, pageSize, pageNumber);
-                if (command is null) return [];
+                var result = _commandFactory.CreateBeatmapPlaycountFilterCommand(conn, searchParams, userId, pageSize, pageNumber);
+                if (!result.Successful) return result.Error!;
+
+                using var command = result.Value!;
                 var reader = await command.ExecuteReaderAsync();
                 while (reader.Read()) res.Add(reader.ReadBeatmapPlaycountInclude());
                 reader.Close();
-                return res;
+                
+                if (res.Count == 0) return Errors.NotFound("No beatmaps match the given query");
+                else return res;
             });
         }
 
-        public async Task<Beatmap?> GetBeatmapById(int id)
+        public async Task<Result<Beatmap>> GetBeatmapById(int id)
         {
             _logger.LogDebug("Getting beatmap with id: {BeatmapId}", id);
             
             string key = CacheKey.ConvertTypeToKey<Beatmap>((id, "mapid"));
-            return await _db.ExecuteCommandAsync<Beatmap?>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<Result<Beatmap>>(key, async (conn) =>
             {
-                Beatmap? res = null;
-                using var command = _commandFactory.CreateGetBeatmapByIdCommand(conn, id);
-                if (command is null) return default;
+                var result = _commandFactory.CreateGetBeatmapByIdCommand(conn, id);
+                if (!result.Successful) return result.Error!;
+
+                using var command = result.Value!;
                 var reader = await command.ExecuteReaderAsync();
-                if (reader.Read()) res = reader.ReadBeatmap();
-                reader.Close();
-                return res;
+                if (reader.Read()) {
+                    var res = reader.ReadBeatmap();
+                    reader.Close();
+                    return res;
+                } else return Errors.NotFound("Beatmap not found");
             });
         }
 
-        public async Task<List<BeatmapPlaycount>> GetBeatmapPlaycountsForUser(int userId, int pageSize, int pageNumber)
+        public async Task<Result<List<BeatmapPlaycount>>> GetBeatmapPlaycountsForUser(int userId, int pageSize, int pageNumber)
             => await FilterBeatmapPlaycountsForUser(SearchParams.Empty, userId, pageSize, pageNumber);
 
-        public async Task<BeatmapSet?> GetBeatmapSetById(int id)
+        public async Task<Result<BeatmapSet>> GetBeatmapSetById(int id)
         {
             _logger.LogDebug("Getting beatmapset with id: {BeatmapSetId}", id);
             
             string key = CacheKey.ConvertTypeToKey<BeatmapSet>((id, "setid"));
-            return await _db.ExecuteCommandAsync<BeatmapSet?>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<Result<BeatmapSet>>(key, async (conn) =>
             {
-                BeatmapSet? res = null;
-                using var command = _commandFactory.CreateGetBeatmapSetByIdCommand(conn, id);
-                if (command is null) return default;
+                var result = _commandFactory.CreateGetBeatmapSetByIdCommand(conn, id);
+                if (!result.Successful) return result.Error!;
+
+                using var command = result.Value!;
                 var reader = await command.ExecuteReaderAsync();
-                if (reader.Read()) res = reader.ReadBeatmapSet();
-                reader.Close();
-                return res;
+                if (reader.Read()) {
+                    var res = reader.ReadBeatmapSet();
+                    reader.Close();
+                    return res;
+                } else return Errors.NotFound("Beatmap set not found");
             });
         }
 
-        public async Task<int?> GetPlaycountForBeatmap(int userId, int beatmapId)
+        public async Task<Result<int>> GetPlaycountForBeatmap(int userId, int beatmapId)
         {
             _logger.LogDebug("Get playcount for userId: {UserId} on beatmapId: {BeatmapId}", userId, beatmapId);
-            
-            string key = CacheKey.ConvertTypeToKey<int>((userId, "pc_userid"), (beatmapId, "pc_mapid"));
-            return await _db.ExecuteCommandAsync<int?>(key, async (conn) =>
+            var bpcResult = await GetBeatmapPlaycountForUserOnMap(userId, beatmapId);
+            return bpcResult.Successful switch
             {
-                int? res = null;
-                using var command = _commandFactory.CreateGetPlaycountForBeatmapCommand(conn, userId, beatmapId);
-                if (command is null) return default;
-                var reader = await command.ExecuteReaderAsync();
-                if (reader.Read()) res = reader.GetInt32(0);
-                reader.Close();
-                return res;
-            });
+                true => bpcResult.Value!.Count,
+                false => bpcResult.Error!
+            };
         }
 
-        public async Task<BeatmapPlaycount?> GetBeatmapPlaycountForUserOnMap(int userId, int beatmapId)
+        public async Task<Result<BeatmapPlaycount>> GetBeatmapPlaycountForUserOnMap(int userId, int beatmapId)
         {
             _logger.LogDebug("Get beatmap playcount info for userId: {UserId} on beatmapId: {BeatmapId}", userId, beatmapId);
             
             string key = CacheKey.ConvertTypeToKey<BeatmapPlaycount>((userId, "pc_userid"), (beatmapId, "pc_mapid"));
-            return await _db.ExecuteCommandAsync<BeatmapPlaycount?>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<Result<BeatmapPlaycount>>(key, async (conn) =>
             {
-                BeatmapPlaycount? res = null;
-                using var command = _commandFactory.CreateGetBeatmapPlaycountForUserCommand(conn, userId, beatmapId);
-                if (command is null) return default;
+                var result = _commandFactory.CreateGetBeatmapPlaycountForUserCommand(conn, userId, beatmapId);
+                if (!result.Successful) return result.Error!;
+
+                using var command = result.Value!;
                 var reader = await command.ExecuteReaderAsync();
-                if (reader.Read()) res = reader.ReadBeatmapPlaycountInclude();
-                reader.Close();
-                return res;
+                if (reader.Read()) {
+                    var res = reader.ReadBeatmapPlaycountInclude();
+                    reader.Close();
+                    return res;
+                } else return Errors.NotFound("Beatmap set not found");
             });
         }
 
@@ -178,29 +174,38 @@ namespace OSPC.Infrastructure.Database.Repository
             List<string> invalidatedKeys = [CacheKey.ConvertTypeToKey<int>((channelId, "channelId"))];
             await _db.ExecuteInsertAsync(invalidatedKeys, async (conn) =>
             {
-                using var command = _commandFactory.CreateUpdateReferencedBeatmapIdForChannelCommand(conn, channelId, beatmapId);
-                return command is {} && await command.ExecuteNonQueryAsync() > 0;
+                var result = _commandFactory.CreateUpdateReferencedBeatmapIdForChannelCommand(conn, channelId, beatmapId);
+                if (!result.Successful) {
+                    _logger.LogError("Error occured during insert {@Error}", result.Error!);
+                    return false;
+                }
+
+                using var command = result.Value!;
+                return await command.ExecuteNonQueryAsync() > 0;
             });
         }
 
-        public async Task<int?> GetReferencedBeatmapIdForChannel(ulong channelId)
+        public async Task<Result<int>> GetReferencedBeatmapIdForChannel(ulong channelId)
         {
             _logger.LogDebug("Get referenced beatmapId for channelId: {ChannelId}", channelId);
             
-            return await _db.ExecuteCommandAsync<int?>(
+            return await _db.ExecuteCommandAsync<Result<int>>(
                 CacheKey.ConvertTypeToKey<int>((channelId, "channelId")), 
                 async (conn) => {
-                    int res = -1;
-                    using var command = _commandFactory.CreateGetReferencedBeatmapIdForChannelCommand(conn, channelId);
-                    if (command is null) return null;
+                    var result = _commandFactory.CreateGetReferencedBeatmapIdForChannelCommand(conn, channelId);
+                    if (!result.Successful) return result.Error!;
+
+                    using var command = result.Value!;
                     var reader = await command.ExecuteReaderAsync();
-                    if (reader.Read()) res = reader.GetInt32(0);
-                    reader.Close();
-                    return res;
+                    if (reader.Read()) {
+                        var res = reader.GetInt32(0);
+                        reader.Close();
+                        return res;
+                    } else return Errors.NotFound("Couldn't find last referenced beatmap in channel");
                 });
         }
 
-        public async Task<int> GetTotalResultCountForSearch(SearchParams searchParams, int userId)
+        public async Task<Result<int>> GetTotalResultCountForSearch(SearchParams searchParams, int userId)
         {
             _logger.LogDebug("Get userId: {UserId} total amount of results for searchParams: {@SearchParams}", userId, searchParams);
             
@@ -213,15 +218,18 @@ namespace OSPC.Infrastructure.Database.Repository
                     (searchParams.Exact, "exact"),
                     (searchParams.BeatmapFilter, "beatmapFilter")
             );
-            return await _db.ExecuteCommandAsync<int>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<Result<int>>(key, async (conn) =>
             {
-                int res = 0;
-                using var command = _commandFactory.CreateBeatmapPlaycountFilterCommand(conn, searchParams, userId);
-                if (command is null) return -1;
+                var result = _commandFactory.CreateBeatmapPlaycountFilterCommand(conn, searchParams, userId);
+                if (!result.Successful) return result.Error!;
+
+                using var command = result.Value!;
                 var reader = await command.ExecuteReaderAsync();
-                if (reader.Read()) res = reader.GetInt32(0);
-                reader.Close();
-                return res;
+                if (reader.Read()) {
+                    var res = reader.GetInt32(0);
+                    reader.Close();
+                    return res;
+                } else return Errors.NotFound("Couldn't find any results for given query");
             });
         }
         

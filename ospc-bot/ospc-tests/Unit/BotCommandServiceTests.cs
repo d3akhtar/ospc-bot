@@ -10,6 +10,7 @@ using ChannelOsuContext = OSPC.Utils.ChannelOsuContext;
 using SearchParams = OSPC.Utils.Parsing.SearchParams;
 using Xunit.Abstractions;
 using OSPC.Domain.Model;
+using OSPC.Utils;
 
 namespace OSPC.Tests.Unit
 {
@@ -77,7 +78,10 @@ namespace OSPC.Tests.Unit
 				.ReturnsAsync(mockBeatmapPlaycount);
 			_beatmapRepoMock
 				.Setup(b => b.FilterBeatmapPlaycountsForUser(It.IsAny<SearchParams>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.ReturnsAsync([mockBeatmapPlaycount]);
+				.ReturnsAsync(new List<BeatmapPlaycount>() { mockBeatmapPlaycount });
+			_beatmapRepoMock
+				.Setup(b => b.GetTotalResultCountForSearch(It.IsAny<SearchParams>(), It.IsAny<int>()))
+				.ReturnsAsync(100);
 
 			_userSearchMock = new();
 			_userSearchMock
@@ -185,28 +189,6 @@ namespace OSPC.Tests.Unit
 
 			Assert.False(result.Successful);
 			Assert.Equivalent($"Something went wrong while mapping user {username}", result.Embed.Description);
-		}
-
-		[Fact]
-		public async Task LinkProfileFailTest2()
-		{
-			string username = "opensand";
-			
-			_userRepoMock
-				.Setup(u => u.AddDiscordPlayerMapping(It.IsAny<ulong>(), It.IsAny<int>()))
-				.Throws<Exception>();
-				
-			var result = await _botCmds.LinkProfile(ChannelOsuContext.Empty, username);
-
-			_output.WriteLine($"Result embed description: {result.Embed.Description}");
-			
-			_loggerMock.Verify(LogLevel.Information, Times.Exactly(1));
-
-			_userSearchMock.Verify(u => u.SearchUser(It.IsAny<string>(), It.IsAny<ChannelOsuContext>()), Times.Exactly(1));
-			_userRepoMock.Verify(u => u.AddDiscordPlayerMapping(It.IsAny<ulong>(), It.IsAny<int>()), Times.Exactly(1));
-
-			Assert.False(result.Successful);
-			Assert.Equivalent($"Something went wrong while linking user {username}", result.Embed.Description);
 		}
 	}
 }

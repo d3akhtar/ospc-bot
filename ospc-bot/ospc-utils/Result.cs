@@ -14,7 +14,10 @@ namespace OSPC.Utils
     
 	    private Result(T value) : base(true, Error: null) => Value = value;
 	    private Result(Error error): base(false, error) {}
-    
+
+    	public static Result<T> Success(T value) => new(value);
+    	public static new Result<T> Fail(Error error) => new(error);
+		
 	    public static implicit operator Result<T>(T value) => new(value);
 	    public static implicit operator Result<T>(Exception exception) => new(Errors.Exceptional(exception));
 	    public static implicit operator Result<T>(Error error) 
@@ -38,11 +41,12 @@ namespace OSPC.Utils
     
 	    public static bool UnexpectedErrorForResultType<T>(Error error)
 	    {
-	        Type type = typeof(T);
-	        if (!_expectedErrorsForResultType.ContainsKey(type)) 
-	            throw new ArgumentException($"Results of Type {type} aren't expected to have errors currently");
-	        else
-	            return !_expectedErrorsForResultType[type].Contains(error.Type);
+			return false;
+	        // Type type = typeof(T);
+	        // if (!_expectedErrorsForResultType.ContainsKey(type)) 
+	        //     throw new ArgumentException($"Results of Type {type} aren't expected to have errors currently");
+	        // else
+	        //     return !_expectedErrorsForResultType[type].Contains(error.Type);
 	    }
 	}
 

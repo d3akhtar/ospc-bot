@@ -9,6 +9,8 @@ using OSPC.Tests.Mocks;
 using OSPC.Domain.Model;
 using OSPC.Tests.Extensions;
 using OSPC.Utils.Parsing;
+using OSPC.Utils;
+using OSPC.Tests.DefaultValueProviders;
 
 namespace OSPC.Tests.Unit
 {
@@ -24,8 +26,8 @@ namespace OSPC.Tests.Unit
 		public BeatmapRepositoryTests()
 		{
 			_loggerMock = new();
-			_commandFactoryMock = new();
-			_transactionFactoryMock = new();
+			_commandFactoryMock = new(MockBehavior.Loose) { DefaultValueProvider = new DatabaseDefaultValueProvider() };
+			_transactionFactoryMock = new(MockBehavior.Loose) { DefaultValueProvider = new DatabaseDefaultValueProvider() };
 			_dbMock = new();
 
 			_beatmapRepo = new(_loggerMock.Object, _dbMock, _commandFactoryMock.Object, _transactionFactoryMock.Object);

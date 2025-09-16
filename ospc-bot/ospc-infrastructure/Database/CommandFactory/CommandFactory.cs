@@ -16,141 +16,221 @@ namespace OSPC.Infrastructure.Database.CommandFactory
 			_logger = logger;
 		}
 		
-		public MySqlCommand CreateGetBeatmapByIdCommand(MySqlConnection conn, int beatmapId)
+		public Result<MySqlCommand> CreateGetBeatmapByIdCommand(MySqlConnection conn, int beatmapId)
 		{
 			LogCommandCreation(new { BeatmapId = beatmapId });
 			return CreateQueryIdCommand("CALL GetBeatmapById(@Id)", conn, beatmapId);
 		}
 
-		public MySqlCommand CreateGetBeatmapSetByIdCommand(MySqlConnection conn, int beatmapSetId)
+		public Result<MySqlCommand> CreateGetBeatmapSetByIdCommand(MySqlConnection conn, int beatmapSetId)
 		{
 			LogCommandCreation(new { BeatmapSetId = beatmapSetId });
 			return CreateQueryIdCommand("CALL GetBeatmapSetById(@Id)", conn, beatmapSetId);
 		}
 
-		public MySqlCommand CreateGetPlaycountForBeatmapCommand(MySqlConnection conn, int userId, int beatmapId)
+		public Result<MySqlCommand> CreateGetPlaycountForBeatmapCommand(MySqlConnection conn, int userId, int beatmapId)
 		{
 			LogCommandCreation(new { UserId = userId, BeatmapId = beatmapId} );
 			return CreateBeatmapPlaycountCommand("CALL GetPlaycountForBeatmap(@UserId, @BeatmapId)", conn, userId, beatmapId);
 		}
 
-		public MySqlCommand CreateGetBeatmapPlaycountForUserCommand(MySqlConnection conn, int userId, int beatmapId)
+		public Result<MySqlCommand> CreateGetBeatmapPlaycountForUserCommand(MySqlConnection conn, int userId, int beatmapId)
 		{
 			LogCommandCreation(new { UserId = userId, BeatmapId = beatmapId} );
 			return CreateBeatmapPlaycountCommand("CALL GetBeatmapPlaycountForUser(@UserId, @BeatmapId)", conn, userId, beatmapId);
 		}
 
-		private MySqlCommand CreateBeatmapPlaycountCommand(string query, MySqlConnection conn, int userId, int beatmapId)
+		private Result<MySqlCommand> CreateBeatmapPlaycountCommand(string query, MySqlConnection conn, int userId, int beatmapId)
 		{
-			var command = new MySqlCommand(query, conn);
-			command.Parameters.AddWithValue("@UserId", userId);
-			command.Parameters.AddWithValue("@BeatmapId", beatmapId);
-			return command;
+			try {
+				var command = new MySqlCommand(query, conn);
+				command.Parameters.AddWithValue("@UserId", userId);
+				command.Parameters.AddWithValue("@BeatmapId", beatmapId);
+				return command;
+			} catch (MySqlException ex) {
+				_logger.LogCritical(ex, "MySql exception occured");
+				return ex;
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Exception during command creation");
+				return ex;
+			}
 		}
 
-		public MySqlCommand CreateUpdateReferencedBeatmapIdForChannelCommand(MySqlConnection conn, ulong channelId, int beatmapId)
+		public Result<MySqlCommand> CreateUpdateReferencedBeatmapIdForChannelCommand(MySqlConnection conn, ulong channelId, int beatmapId)
 		{
 			LogCommandCreation(new { ChannelId = channelId, BeatmapId = beatmapId });
 			
-			string query = "CALL UpdateReferencedBeatmapIdForChannel(@ChannelId, @BeatmapId)";
-			var command = new MySqlCommand(query, conn);
-			command.Parameters.AddWithValue("@ChannelId", channelId);
-			command.Parameters.AddWithValue("@BeatmapId", beatmapId);
-			return command;
+			try {
+				string query = "CALL UpdateReferencedBeatmapIdForChannel(@ChannelId, @BeatmapId)";
+				var command = new MySqlCommand(query, conn);
+				command.Parameters.AddWithValue("@ChannelId", channelId);
+				command.Parameters.AddWithValue("@BeatmapId", beatmapId);
+				return command;
+			} catch (MySqlException ex) {
+				_logger.LogCritical(ex, "MySql exception occured");
+				return ex;
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Exception during command creation");
+				return ex;
+			}
 		}
 		
-		public MySqlCommand CreateGetReferencedBeatmapIdForChannelCommand(MySqlConnection conn, ulong channelId)
+		public Result<MySqlCommand> CreateGetReferencedBeatmapIdForChannelCommand(MySqlConnection conn, ulong channelId)
 		{
 			LogCommandCreation(new { ChannelId = channelId });
 			
-			string query = "CALL GetReferencedBeatmapIdForChannel(@ChannelId)";
-			var command = new MySqlCommand(query, conn);
-			command.Parameters.AddWithValue("@ChannelId", channelId);
-			return command;
+			try {
+				string query = "CALL GetReferencedBeatmapIdForChannel(@ChannelId)";
+				var command = new MySqlCommand(query, conn);
+				command.Parameters.AddWithValue("@ChannelId", channelId);
+				return command;
+			} catch (MySqlException ex) {
+				_logger.LogCritical(ex, "MySql exception occured");
+				return ex;
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Exception during command creation");
+				return ex;
+			}
 		}
 
-		public MySqlCommand CreateAddDiscordPlayerMappingCommand(MySqlConnection conn, ulong discordUserId, int playerUserId)
+		public Result<MySqlCommand> CreateAddDiscordPlayerMappingCommand(MySqlConnection conn, ulong discordUserId, int playerUserId)
 		{
 			LogCommandCreation(new { DiscordUserId = discordUserId, PlayerUserId = playerUserId });
 			
-			string query = "CALL AddDiscordPlayerMapping(@DiscordUserId, @PlayerUserId)";
-			var command = new MySqlCommand(query, conn);
-			command.Parameters.AddWithValue("@DiscordUserId", discordUserId);
-			command.Parameters.AddWithValue("@PlayerUserId", playerUserId);
-			return command;
+			try {
+				string query = "CALL AddDiscordPlayerMapping(@DiscordUserId, @PlayerUserId)";
+				var command = new MySqlCommand(query, conn);
+				command.Parameters.AddWithValue("@DiscordUserId", discordUserId);
+				command.Parameters.AddWithValue("@PlayerUserId", playerUserId);
+				return command;
+			} catch (MySqlException ex) {
+				_logger.LogCritical(ex, "MySql exception occured");
+				return ex;
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Exception during command creation");
+				return ex;
+			}
 		}
 
-		public MySqlCommand CreateGetPlayerInfoFromDiscordIdCommand(MySqlConnection conn, ulong discordUserId)
+		public Result<MySqlCommand> CreateGetPlayerInfoFromDiscordIdCommand(MySqlConnection conn, ulong discordUserId)
 		{
 			LogCommandCreation(new { DiscordUserId = discordUserId });
 			
-			string query = "CALL GetPlayerInfoFromDiscordId(@DiscordUserId)";
-			var command = new MySqlCommand(query, conn);
-			command.Parameters.AddWithValue("@DiscordUserId", discordUserId);
-			return command;
+			try {
+				string query = "CALL GetPlayerInfoFromDiscordId(@DiscordUserId)";
+				var command = new MySqlCommand(query, conn);
+				command.Parameters.AddWithValue("@DiscordUserId", discordUserId);
+				return command;
+			} catch (MySqlException ex) {
+				_logger.LogCritical(ex, "MySql exception occured");
+				return ex;
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Exception during command creation");
+				return ex;
+			}
 		}
 
-		public MySqlCommand CreateAddUserCommand(MySqlConnection conn, User user)
+		public Result<MySqlCommand> CreateAddUserCommand(MySqlConnection conn, User user)
 		{
 			LogCommandCreation(new { User = user });
 
-			string query = "CALL AddUser(@Id, @Username, @CountryCode, @AvatarUrl, @ProfileColour)";
-			var command = new MySqlCommand(query, conn);
-			command.Parameters.AddWithValue("@Id", user.Id);
-			command.Parameters.AddWithValue("@Username", user.Username);
-			command.Parameters.AddWithValue("@CountryCode", user.CountryCode);
-			command.Parameters.AddWithValue("@AvatarUrl", user.AvatarUrl);
-			command.Parameters.AddWithValue("@ProfileColour", user.ProfileColour);
-			return command;
+			try {
+				string query = "CALL AddUser(@Id, @Username, @CountryCode, @AvatarUrl, @ProfileColour)";
+				var command = new MySqlCommand(query, conn);
+				command.Parameters.AddWithValue("@Id", user.Id);
+				command.Parameters.AddWithValue("@Username", user.Username);
+				command.Parameters.AddWithValue("@CountryCode", user.CountryCode);
+				command.Parameters.AddWithValue("@AvatarUrl", user.AvatarUrl);
+				command.Parameters.AddWithValue("@ProfileColour", user.ProfileColour);
+				return command;
+			} catch (MySqlException ex) {
+				_logger.LogCritical(ex, "MySql exception occured");
+				return ex;
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Exception during command creation");
+				return ex;
+			}
 		}
 
-		public MySqlCommand CreateGetUserByIdCommand(MySqlConnection conn, int userId)
+		public Result<MySqlCommand> CreateGetUserByIdCommand(MySqlConnection conn, int userId)
 		{
 			LogCommandCreation(new { UserId = userId });
 			return CreateQueryIdCommand("CALL GetUserById(@Id)", conn, userId);
 		}
 
 
-		public MySqlCommand CreateGetUserByUsernameCommand(MySqlConnection conn, string username)
+		public Result<MySqlCommand> CreateGetUserByUsernameCommand(MySqlConnection conn, string username)
 		{
 			LogCommandCreation(new { Username = username });
 			
-			string query = "CALL GetUserByUsername(@Username)";
-			var command = new MySqlCommand(query, conn);
-			command.Parameters.AddWithValue("@Username", username);
-			return command;
+			try {
+				string query = "CALL GetUserByUsername(@Username)";
+				var command = new MySqlCommand(query, conn);
+				command.Parameters.AddWithValue("@Username", username);
+				return command;
+			} catch (MySqlException ex) {
+				_logger.LogCritical(ex, "MySql exception occured");
+				return ex;
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Exception during command creation");
+				return ex;
+			}
 		}
 
 
-		public MySqlCommand CreateGetUserWithDiscordIdCommand(MySqlConnection conn, ulong discordUserId)
+		public Result<MySqlCommand> CreateGetUserWithDiscordIdCommand(MySqlConnection conn, ulong discordUserId)
 		{
 			LogCommandCreation(new { DiscordUserId = discordUserId });
 
-			string query = "CALL GetUserWithDiscordId(@DiscordUserId)";
-			var command = new MySqlCommand(query, conn);
-			command.Parameters.AddWithValue("@DiscordUserId", discordUserId);
-			return command;
+			try {
+				string query = "CALL GetUserWithDiscordId(@DiscordUserId)";
+				var command = new MySqlCommand(query, conn);
+				command.Parameters.AddWithValue("@DiscordUserId", discordUserId);
+				return command;
+			} catch (MySqlException ex) {
+				_logger.LogCritical(ex, "MySql exception occured");
+				return ex;
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Exception during command creation");
+				return ex;
+			}
 		}
 
-		public MySqlCommand CreateBeatmapPlaycountFilterCommand(MySqlConnection conn, SearchParams searchParams, int userId, int pageSize = -1, int pageNumber = -1)
+		public Result<MySqlCommand> CreateBeatmapPlaycountFilterCommand(MySqlConnection conn, SearchParams searchParams, int userId, int pageSize = -1, int pageNumber = -1)
         {
 			LogCommandCreation(new { SearchParams = searchParams, UserId = userId, PageSize = pageSize, PageNumber = pageNumber });
 			
-            (string query, bool generalQuery) = CreateFilterQuery(searchParams, userId, pageSize, pageNumber);
-            MySqlCommand command = new MySqlCommand(query, conn);
-            if (generalQuery) command.Parameters.AddWithValue("@query", searchParams.Query);
-            else {
-                command.Parameters.AddWithValue("@artist", searchParams.Artist ?? string.Empty);
-                command.Parameters.AddWithValue("@title", searchParams.Title ?? string.Empty);
-            }
-            return command;
+			try {
+	            (string query, bool generalQuery) = CreateFilterQuery(searchParams, userId, pageSize, pageNumber);
+	            MySqlCommand command = new MySqlCommand(query, conn);
+	            if (generalQuery) command.Parameters.AddWithValue("@query", searchParams.Query);
+	            else {
+	                command.Parameters.AddWithValue("@artist", searchParams.Artist ?? string.Empty);
+	                command.Parameters.AddWithValue("@title", searchParams.Title ?? string.Empty);
+	            }
+	            return command;
+			} catch (MySqlException ex) {
+				_logger.LogCritical(ex, "MySql exception occured");
+				return ex;
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Exception during command creation");
+				return ex;
+			}
         }
 		
-		private MySqlCommand CreateQueryIdCommand(string query, MySqlConnection conn, int id)
+		private Result<MySqlCommand> CreateQueryIdCommand(string query, MySqlConnection conn, int id)
 		{
-			var command = new MySqlCommand(query, conn);
-			command.Parameters.AddWithValue("@Id", id);
-			return command;
+			try {
+				var command = new MySqlCommand(query, conn);
+				command.Parameters.AddWithValue("@Id", id);
+				return command;
+			} catch (MySqlException ex) {
+				_logger.LogCritical(ex, "MySql exception occured");
+				return ex;
+			} catch (Exception ex) {
+				_logger.LogCritical(ex, "Exception during command creation");
+				return ex;
+			}
 		}
 
         private (string, bool) CreateFilterQuery(SearchParams searchParams, int userId, int pageSize, int pageNumber) 

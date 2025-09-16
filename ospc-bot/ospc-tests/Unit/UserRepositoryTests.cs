@@ -7,6 +7,7 @@ using MySql.Data.MySqlClient;
 using OSPC.Tests.Mocks;
 using OSPC.Domain.Model;
 using OSPC.Tests.Extensions;
+using OSPC.Tests.DefaultValueProviders;
 
 namespace OSPC.Tests.Unit
 {
@@ -21,7 +22,7 @@ namespace OSPC.Tests.Unit
 		public UserRepositoryTests()
 		{
 			_loggerMock = new();
-			_commandFactoryMock = new();
+			_commandFactoryMock = new(MockBehavior.Loose) { DefaultValueProvider = new DatabaseDefaultValueProvider() };
 			_dbMock = new();
 
 			_userRepo = new(_loggerMock.Object, _dbMock, _commandFactoryMock.Object);

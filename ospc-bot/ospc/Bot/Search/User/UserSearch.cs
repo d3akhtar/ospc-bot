@@ -19,20 +19,23 @@ namespace OSPC.Bot.Search.UserSearch
 			_osuWebClient = osuWebClient;
 		}
 		
-        public async Task<User?> SearchUser(string username, ChannelOsuContext? channelOsuContext = null)
+        public async Task<Result<User>> SearchUser(string username, ChannelOsuContext? channelOsuContext = null)
         {
 			_logger.LogDebug("Searching for user using username: {Username} and context: {@ChannelOsuContext}", username, channelOsuContext);
 
-			User? user = channelOsuContext != null && username == User.Unspecified ?
+			var userResult = channelOsuContext != null && username == User.Unspecified ?
 				await _userRepo.GetUserWithDiscordId(channelOsuContext.DiscordUserId):
 				await _userRepo.GetUserByUsername(username);
 
-			if (user == null) {
-				user = await _osuWebClient.FindUserWithUsername(username);
-				if (user is {} u) await _userRepo.AddUser(u);
+			if (!userResult.Successful) {
+				var user = await _osuWebClient.FindUserWithUsername(username);
+				if (user is {} u) {
+					await _userRepo.AddUser(u);
+					return user;
+				}
 			}
 
-			return user;
+			return userResult;
         }
     }
 }

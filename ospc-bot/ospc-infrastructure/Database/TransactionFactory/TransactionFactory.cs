@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using OSPC.Domain.Model;
+using OSPC.Utils;
 
 namespace OSPC.Infrastructure.Database.TransactionFactory
 {
@@ -14,7 +15,7 @@ namespace OSPC.Infrastructure.Database.TransactionFactory
 			_logger = logger;
 		}
 		
-		public async Task<MySqlTransaction> CreateAddBeatmapPlaycountTransaction(MySqlConnection conn, IEnumerable<BeatmapPlaycount> bpcs)
+		public async Task<Result<MySqlTransaction>> CreateAddBeatmapPlaycountTransaction(MySqlConnection conn, IEnumerable<BeatmapPlaycount> bpcs)
 		{
 			LogTransactionCreation(new { BeatmapPlaycountBeatmapIds = bpcs.Select(bpc => bpc.BeatmapId) } );
 
@@ -33,15 +34,18 @@ namespace OSPC.Infrastructure.Database.TransactionFactory
 	                command.Parameters["@Count"].Value = bpc.Count;
 	                await command.ExecuteNonQueryAsync();
 				}
+			} catch(MySqlException ex) {
+				_logger.LogCritical("MySql exception occured");
+				return ex;
 			} catch (Exception ex) {
-				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}", query);
-				throw;
+				_logger.LogCritical(ex, "Exception while creating transaction");
+				return ex;
 			}
 
 			return transaction;
 		}
 
-		public async Task<MySqlTransaction> CreateAddBeatmapTransaction(MySqlConnection conn, IEnumerable<Beatmap> beatmaps)
+		public async Task<Result<MySqlTransaction>> CreateAddBeatmapTransaction(MySqlConnection conn, IEnumerable<Beatmap> beatmaps)
 		{
 			LogTransactionCreation(new { BeatmapIds = beatmaps.Select(beatmap => beatmap.Id )});
 			
@@ -74,15 +78,18 @@ namespace OSPC.Infrastructure.Database.TransactionFactory
 	                command.Parameters["@AR"].Value = beatmap.AR;
 	                await command.ExecuteNonQueryAsync();
 	            }
+			} catch(MySqlException ex) {
+				_logger.LogCritical("MySql exception occured");
+				return ex;
 			} catch (Exception ex) {
-				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}", query);
-				throw;
+				_logger.LogCritical(ex, "Exception while creating transaction");
+				return ex;
 			}
 
 			return transaction;
 		}
 
-		public async Task<MySqlTransaction> CreateAddBeatmapSetTransaction(MySqlConnection conn, IEnumerable<BeatmapSet> beatmapSets)
+		public async Task<Result<MySqlTransaction>> CreateAddBeatmapSetTransaction(MySqlConnection conn, IEnumerable<BeatmapSet> beatmapSets)
 		{
 			LogTransactionCreation(new { BeatmapSetIds = beatmapSets.Select(beatmapSet => beatmapSet.Id) });
 			
@@ -105,9 +112,12 @@ namespace OSPC.Infrastructure.Database.TransactionFactory
 	                command.Parameters["@UserId"].Value = set.UserId;
 	                await command.ExecuteNonQueryAsync();
 	            }
+			} catch(MySqlException ex) {
+				_logger.LogCritical("MySql exception occured");
+				return ex;
 			} catch (Exception ex) {
-				_logger.LogCritical(ex, "Error while creating transaction from template query: {Query}", query);
-				throw;
+				_logger.LogCritical(ex, "Exception while creating transaction");
+				return ex;
 			}
 
 			return transaction;

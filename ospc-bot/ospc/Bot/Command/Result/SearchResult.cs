@@ -1,6 +1,7 @@
 using Discord;
 using OSPC.Bot.Component;
 using OSPC.Bot.Context;
+using OSPC.Utils;
 
 namespace OSPC.Bot.Command.Result
 {
@@ -14,5 +15,8 @@ namespace OSPC.Bot.Command.Result
 				Embed = Embeded.BuildErrorEmbed(message),
 				Successful = false
 			};
+
+		public new static SearchResult Error(Error error)
+			=> Error(error.Message!);
 	}
 }

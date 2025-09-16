@@ -44,8 +44,7 @@ namespace OSPC.Tests.Unit
 		[Theory]
 		[InlineData("\"open sand\"")]
 		public void UsernameParseMultiWordTest(string input)
-		{
-			
+		{			
 			ParseResult<SearchParams> result = SearchParams.Parse(input);
 
 			Assert.True(result.Successful);
@@ -313,7 +312,7 @@ namespace OSPC.Tests.Unit
 			Assert.False(result.Successful);
 			Assert.Null(result.Value);
 
-			Assert.Equivalent(error, result.Error);
+			Assert.Equivalent(error, result.Error!.Message);
 		}
 	}
 }
