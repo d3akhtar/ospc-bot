@@ -1,6 +1,8 @@
 using Discord;
 using Discord.Commands;
+
 using Microsoft.Extensions.Logging;
+
 using OSPC.Bot.Command;
 using OSPC.Bot.Component;
 using OSPC.Bot.Context;
@@ -63,11 +65,13 @@ namespace OSPC.Bot.Module.Info
 
         [Command("search")]
         [Summary("Search for beatmaps in most-played")]
-        public async Task Search([Remainder]string input)
+        public async Task Search([Remainder] string input)
         {
             var result = SearchParams.Parse(input);
-            if (!result.Successful) await ReplyErrorAsync(result.Error!);
-            else await ReplyBotCommandResultAsync(await _botCmds.Search(Context.GetOsuContext(), result.Value!));
+            if (!result.Successful)
+                await ReplyErrorAsync(result.Error!);
+            else
+                await ReplyBotCommandResultAsync(await _botCmds.Search(Context.GetOsuContext(), result.Value!));
         }
 
         private async Task PageForEmbedUpdated(ulong id)
@@ -84,9 +88,12 @@ namespace OSPC.Bot.Module.Info
 
             var match = RegexPatterns.OsuBeatmapLinkRegex.Match(usernameOrBeatmap);
 
-            if (match.Success) beatmapId = int.Parse(match.Groups[2].Value);
-            else if (RegexPatterns.StrictUsernameRegex.IsMatch(usernameOrBeatmap)) username = usernameOrBeatmap;
-            else return false;
+            if (match.Success)
+                beatmapId = int.Parse(match.Groups[2].Value);
+            else if (RegexPatterns.StrictUsernameRegex.IsMatch(usernameOrBeatmap))
+                username = usernameOrBeatmap;
+            else
+                return false;
 
             return true;
         }

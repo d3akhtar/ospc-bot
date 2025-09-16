@@ -1,29 +1,35 @@
 using System.Reflection;
 using System.Text.Json;
+
 using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.Net;
 using Discord.WebSocket;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+
 using OSPC.Bot.Command;
 using OSPC.Bot.Component;
 using OSPC.Bot.Logging;
+using OSPC.Bot.MessageHandlers;
 using OSPC.Bot.Search.UserSearch;
+using OSPC.Domain.Options;
 using OSPC.Infrastructure.Caching;
 using OSPC.Infrastructure.Database;
+using OSPC.Infrastructure.Database.CommandFactory;
 using OSPC.Infrastructure.Database.Repository;
+using OSPC.Infrastructure.Database.TransactionFactory;
 using OSPC.Infrastructure.Http;
 using OSPC.Infrastructure.Job;
-using OSPC.Domain.Options;
 using OSPC.Utils;
+
 using Serilog;
-using OSPC.Bot.MessageHandlers;
-using OSPC.Infrastructure.Database.CommandFactory;
-using OSPC.Infrastructure.Database.TransactionFactory;
+
 using StackExchange.Redis;
+
 using IDatabase = OSPC.Infrastructure.Database.IDatabase;
 
 namespace OSPC.Bot
@@ -43,7 +49,7 @@ namespace OSPC.Bot
 
         // TODO: THIS SUCKS, DO IT ANOTHER WAY AT SOME POINT
         public async Task InvokePageForEmbedUpdatedEvent(ulong id) => await PageForEmbedUpdated!.Invoke(id);
-        public event Func<ulong,Task>? PageForEmbedUpdated;
+        public event Func<ulong, Task>? PageForEmbedUpdated;
         public Dictionary<ulong, int> CurrentPageForEmbed { get; set; } = new();
         public Dictionary<ulong, ButtonType> LastButtonIdClickedForEmbeded { get; set; } = new();
 
@@ -52,7 +58,7 @@ namespace OSPC.Bot
             Instance = this;
             SetupApp();
         }
-        
+
         public async Task StartAsync()
         {
             using (var scope = _serviceProvider.CreateScope())
@@ -60,7 +66,7 @@ namespace OSPC.Bot
                 var discordOptions = scope.ServiceProvider.GetRequiredService<IOptions<DiscordOptions>>();
 
                 new LoggingService(_client, _cmds, _interactService);
-                
+
                 await _client.LoginAsync(TokenType.Bot, discordOptions.Value.Token);
                 await _client.StartAsync();
 
@@ -89,7 +95,7 @@ namespace OSPC.Bot
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
         }
-        
+
         private void SetupServiceProvider()
         {
             var serviceCollection = new ServiceCollection();
@@ -98,7 +104,7 @@ namespace OSPC.Bot
             {
                 builder.AddSerilog();
             });
-            
+
             serviceCollection
                 .AddAppOption<DatabaseOptions>(_config)
                 .AddAppOption<DiscordOptions>(_config)
@@ -107,9 +113,9 @@ namespace OSPC.Bot
                 .AddScoped<IConnectionMultiplexer, ConnectionMultiplexer>(sp =>
                 {
                     var cacheOptions = sp.GetRequiredService<IOptions<CacheOptions>>();
-                    return ConnectionMultiplexer.Connect(cacheOptions.Value.RedisConnection); 
+                    return ConnectionMultiplexer.Connect(cacheOptions.Value.RedisConnection);
                 })
-                .AddSingleton<IOsuWebClient, OsuWebClient>() 
+                .AddSingleton<IOsuWebClient, OsuWebClient>()
                 .AddSingleton<IRedisService, RedisService>()
                 .AddSingleton<IPlaycountFetchJobQueue, PlaycountFetchJobQueue>()
                 .AddScoped<IDatabase, MySqlDatabase>()
@@ -120,21 +126,21 @@ namespace OSPC.Bot
                 .AddScoped<IBotCommandService, BotCommandService>()
                 .AddSingleton<ICommandFactory, CommandFactory>()
                 .AddSingleton<ITransactionFactory, TransactionFactory>();
-            
+
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
-        
+
         private void SetupClient()
         {
             DiscordSocketConfig discordSocketConfig = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
             };
-            
+
             _client = new DiscordSocketClient(discordSocketConfig);
 
             SetupMessageHandlers();
-            
+
             _client.Ready += OnClientReady;
             _client.InteractionCreated += _interactionHandler.OnInteraction;
             _client.MessageCommandExecuted += _interactionHandler.OnInteraction;
@@ -143,12 +149,12 @@ namespace OSPC.Bot
             _client.ModalSubmitted += _pagedMessageHandler.OnModalSubmit;
             _client.MessageReceived += _simpleMessageHandler.OnMsgReceived;
         }
-        
+
         private void SetupMessageHandlers()
         {
             _cmds = new CommandService();
             _simpleMessageHandler = new SimpleMessageHandler(_client, _serviceProvider, _cmds);
-            
+
             _interactService = new InteractionService(_client.Rest);
             _interactionHandler = new InteractionHandler(_client, _serviceProvider, _interactService);
 
@@ -159,12 +165,15 @@ namespace OSPC.Bot
         {
             ulong guildId = 845680976243982356;
 
-            try {
+            try
+            {
                 var assembly = Assembly.GetEntryAssembly();
                 await _interactService.AddModulesAsync(assembly, _serviceProvider);
                 await _interactService.RegisterCommandsToGuildAsync(guildId);
                 await _cmds.AddModulesAsync(assembly, _serviceProvider);
-            } catch (HttpException e){
+            }
+            catch (HttpException e)
+            {
                 Log.Error(e, "Error while client was getting ready");
             }
         }

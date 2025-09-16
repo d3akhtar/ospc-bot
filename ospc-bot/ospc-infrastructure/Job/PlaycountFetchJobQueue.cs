@@ -1,14 +1,16 @@
 using System.Threading.Channels;
+
 using Microsoft.Extensions.Logging;
+
 using OSPC.Infrastructure.Http;
 
 namespace OSPC.Infrastructure.Job
 {
     public class PlaycountFetchJobQueue : IPlaycountFetchJobQueue
     {
-        private HashSet<int> _servicedUserIds = new();
+        private readonly HashSet<int> _servicedUserIds = new();
         private readonly Channel<int> _userIdChannel;
-        private Queue<string> _servicedUsernameQueue = new();
+        private readonly Queue<string> _servicedUsernameQueue = new();
         private readonly ILogger<PlaycountFetchJobQueue> _logger;
         private readonly IOsuWebClient _osuWebClient;
         private readonly CancellationTokenSource _cts = new();
@@ -21,13 +23,14 @@ namespace OSPC.Infrastructure.Job
             Task.Run(LoadBeatmapPlaycountsAsync);
         }
 
-        public async Task EnqueueAsync(int userId, string username) {
+        public async Task EnqueueAsync(int userId, string username)
+        {
             _logger.LogInformation("Added {Username} to the queue, id: {UserId}", username, userId);
             await _userIdChannel.Writer.WriteAsync(userId);
             _servicedUsernameQueue.Enqueue(username);
             _servicedUserIds.Add(userId);
         }
-    
+
         public async Task LoadBeatmapPlaycountsAsync()
         {
             while (await _userIdChannel.Reader.WaitToReadAsync(_cts.Token))

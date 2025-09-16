@@ -1,5 +1,7 @@
 using Discord.Interactions;
+
 using Microsoft.Extensions.Logging;
+
 using OSPC.Bot.Command;
 using OSPC.Bot.Component;
 using OSPC.Utils;
@@ -27,8 +29,10 @@ namespace OSPC.Bot.Module.Interaction
         [SlashCommand("help", "Get help about commands and what they do")]
         public async Task Help(string command = "")
         {
-            if (string.IsNullOrEmpty(command)) await RespondAsync(embed: Embeded.BuildHelpEmbed(), ephemeral: true);
-            else await RespondAsync(embed: Embeded.BuildHelpEmbedForCommand(command), ephemeral: true);
+            if (string.IsNullOrEmpty(command))
+                await RespondAsync(embed: Embeded.BuildHelpEmbed(), ephemeral: true);
+            else
+                await RespondAsync(embed: Embeded.BuildHelpEmbedForCommand(command), ephemeral: true);
         }
     }
 }

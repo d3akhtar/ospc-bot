@@ -1,8 +1,10 @@
 using Discord.Commands;
 using Discord.Interactions;
-using OSPC.Domain.Options;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
+using OSPC.Domain.Options;
 
 namespace OSPC.Utils
 {
@@ -10,17 +12,19 @@ namespace OSPC.Utils
     {
         public static ChannelOsuContext GetOsuContext(this SocketInteractionContext? socketCtx)
             => socketCtx is not null ?
-                new ChannelOsuContext {
+                new ChannelOsuContext
+                {
                     ChannelId = socketCtx.Channel.Id,
                     DiscordUserId = socketCtx.User.Id,
-                }:ChannelOsuContext.Empty;
-        
+                } : ChannelOsuContext.Empty;
+
         public static ChannelOsuContext GetOsuContext(this SocketCommandContext? socketCtx)
             => socketCtx is not null ?
-                new ChannelOsuContext {
+                new ChannelOsuContext
+                {
                     ChannelId = socketCtx.Channel.Id,
                     DiscordUserId = socketCtx.User.Id,
-                }:ChannelOsuContext.Empty;
+                } : ChannelOsuContext.Empty;
     }
 
     public static class ServiceCollectionExtensions

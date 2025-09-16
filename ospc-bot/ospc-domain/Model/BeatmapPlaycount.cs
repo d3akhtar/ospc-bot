@@ -12,10 +12,10 @@ namespace OSPC.Domain.Model
         public int Count { get; set; }
         public Beatmap? Beatmap { get; set; }
         [JsonPropertyName("beatmapset")]
-        public BeatmapSet? BeatmapSet { get; set; }        
+        public BeatmapSet? BeatmapSet { get; set; }
         public override string ToString()
-            => $"**[{Count}]** [{BeatmapSet?.Artist ?? "[unknown]"} - {BeatmapSet?.Title?? "[unnamed]"} [{Beatmap?.Version ?? "[unknown]"}]]({_baseGetBeatmapUrl + BeatmapId.ToString()}) [{Beatmap?.DifficultyRating ?? 0}★]";
-        
+            => $"**[{Count}]** [{BeatmapSet?.Artist ?? "[unknown]"} - {BeatmapSet?.Title ?? "[unnamed]"} [{Beatmap?.Version ?? "[unknown]"}]]({_baseGetBeatmapUrl + BeatmapId.ToString()}) [{Beatmap?.DifficultyRating ?? 0}★]";
+
         public string ToFullString()
             => ToString() + $"UserId: {UserId}, BeatmapId: {BeatmapId}";
     }

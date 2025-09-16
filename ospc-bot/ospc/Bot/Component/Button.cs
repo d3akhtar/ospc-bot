@@ -26,7 +26,8 @@ namespace OSPC.Bot.Component
                 ).Build();
 
         public static ButtonType GetButtonTypeFromId(string id)
-            => id switch {
+            => id switch
+            {
                 "first_page" => ButtonType.FirstPage,
                 "prev_page" => ButtonType.PreviousPage,
                 "choose_page" => ButtonType.ChoosePage,

@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+
 using OSPC.Utils.Parsing.RegularExpressions.Limitations;
 using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
 
@@ -19,9 +20,10 @@ namespace OSPC.Utils.Parsing
         {
             SetupEvaluator();
         }
-        
-        public static string GetFilterAbbreviation(Expression<Func<BeatmapFilter,ComparisonFilter>> exp)
-        => (exp.Body as MemberExpression)!.Member.Name switch {
+
+        public static string GetFilterAbbreviation(Expression<Func<BeatmapFilter, ComparisonFilter>> exp)
+        => (exp.Body as MemberExpression)!.Member.Name switch
+        {
             "CircleSize" => "cs",
             "BPM" => "bpm",
             "Length" => "length",
@@ -34,19 +36,19 @@ namespace OSPC.Utils.Parsing
 
         public string GetClause()
             => GetClauseForAttribute(this, b => b.CircleSize!) +
-               GetClauseForAttribute(this, b => b.BPM!) + 
+               GetClauseForAttribute(this, b => b.BPM!) +
                GetClauseForAttribute(this, b => b.Length!) +
-               GetClauseForAttribute(this, b => b.HpDrain!) + 
-               GetClauseForAttribute(this, b => b.OD!) + 
-               GetClauseForAttribute(this, b => b.AR!) + 
+               GetClauseForAttribute(this, b => b.HpDrain!) +
+               GetClauseForAttribute(this, b => b.OD!) +
+               GetClauseForAttribute(this, b => b.AR!) +
                GetClauseForAttribute(this, b => b.DifficultyRating!);
 
-        private static string GetClauseForAttribute(BeatmapFilter beatmapFilter, Expression<Func<BeatmapFilter,ComparisonFilter>> exp)
+        private static string GetClauseForAttribute(BeatmapFilter beatmapFilter, Expression<Func<BeatmapFilter, ComparisonFilter>> exp)
             => ComparisonConverter.CreateComparisonClause(
-                exp.Compile().Invoke(beatmapFilter), "Beatmaps", 
+                exp.Compile().Invoke(beatmapFilter), "Beatmaps",
                 (exp.Body as MemberExpression)!.Member.Name
             );
-        
+
         public static new void SetupEvaluator()
         {
             _regexEvaluator
@@ -65,7 +67,7 @@ namespace OSPC.Utils.Parsing
                 .AddNumberComparison(b => b.DifficultyRating, GetFilterAbbreviation(b => b.DifficultyRating!))
                     .AddLimitation(LimitMatchCount.Create(2));
 
-            
+
             BindSetterToRegexGroup(b => b.CircleSize, (instance, matchValue)
                 => ReturnResultBasedOnMatchType<NumberComparisonValue>(instance, (instance, matchValue) => instance.CircleSize = ComparisonFilter.Create(matchValue), matchValue));
 
@@ -87,7 +89,7 @@ namespace OSPC.Utils.Parsing
             BindSetterToRegexGroup(b => b.DifficultyRating, (instance, matchValue)
                 => ReturnResultBasedOnMatchType<NumberComparisonValue>(instance, (instance, matchValue) => instance.DifficultyRating = ComparisonFilter.Create(matchValue), matchValue));
         }
-        
+
         public override string ToString()
             => GetClause();
     }

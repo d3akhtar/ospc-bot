@@ -1,4 +1,5 @@
 using Discord;
+
 using OSPC.Bot.Context;
 using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.Repository;
@@ -20,7 +21,8 @@ namespace OSPC.Bot.Component
             ActiveEmbeds.Add(ctx.Message!.Id, ctx);
             StartTask(ctx.Message);
         }
-        public static void StartTask(IUserMessage message) {
+        public static void StartTask(IUserMessage message)
+        {
             BotClient.Instance.CurrentPageForEmbed.Add(message.Id, 1);
             BotClient.Instance.LastButtonIdClickedForEmbeded.Add(message.Id, ButtonType.Unknown);
             if (!ButtonDeleteTimers.ContainsKey(message.Id))
@@ -32,14 +34,16 @@ namespace OSPC.Bot.Component
 
         public static void PauseTimer(IUserMessage message)
         {
-            if (ButtonDeleteTimers.TryGetValue(message.Id, out Timer? timer) && timer != null){
+            if (ButtonDeleteTimers.TryGetValue(message.Id, out Timer? timer) && timer != null)
+            {
                 timer.Change(Timeout.Infinite, Timeout.Infinite);
             }
         }
 
         public static void ResetTimer(IUserMessage message)
         {
-            if (ButtonDeleteTimers.TryGetValue(message.Id, out Timer? timer) && timer != null){
+            if (ButtonDeleteTimers.TryGetValue(message.Id, out Timer? timer) && timer != null)
+            {
                 timer.Change(TimeSpan.FromSeconds(BUTTON_DELETE_TIME), TimeSpan.FromSeconds(BUTTON_DELETE_TIME));
             }
         }
@@ -47,7 +51,7 @@ namespace OSPC.Bot.Component
         private async static Task DeleteButtons(IUserMessage message)
         {
             await message.ModifyAsync(
-                msg => msg.Components = new ComponentBuilder().Build(), 
+                msg => msg.Components = new ComponentBuilder().Build(),
                 options: new RequestOptions
                 {
                     Timeout = 5000,
@@ -59,13 +63,14 @@ namespace OSPC.Bot.Component
             BotClient.Instance.LastButtonIdClickedForEmbeded.Remove(message.Id);
             ActiveEmbeds.Remove(message.Id);
             ButtonDeleteTimers[message.Id].Dispose();
-            ButtonDeleteTimers.Remove(message.Id); 
+            ButtonDeleteTimers.Remove(message.Id);
         }
 
         public static Embed GetEmbedForBeatmapPlaycount
             (int pageNumber, List<BeatmapPlaycount> beatmapPlaycount, User user, PlaycountEmbedContext ctx, UserRankStatistic? stats)
         {
-            if (beatmapPlaycount.Count == 1) return GetEmbedForSingleBeatmapPlaycount(beatmapPlaycount[0], user, stats);
+            if (beatmapPlaycount.Count == 1)
+                return GetEmbedForSingleBeatmapPlaycount(beatmapPlaycount[0], user, stats);
             var embed = new EmbedBuilder()
                 .WithAuthor(new EmbedAuthorBuilder()
                     .WithName($"{user.Username}: {stats?.Pp ?? 0}PP (#{stats?.Rank ?? 0}, {user.CountryCode}{stats?.CountryRank ?? 0})")
@@ -113,7 +118,7 @@ namespace OSPC.Bot.Component
             => GetSuccessEmbedBaseBuilder(message)
                 .WithThumbnailUrl(imageUrl)
                 .Build();
-                
+
         public static Embed BuildSuccessEmbed(string title, string imageUrl, string description)
             => GetSuccessEmbedBaseBuilder(title)
                 .WithThumbnailUrl(imageUrl)
@@ -134,7 +139,8 @@ namespace OSPC.Bot.Component
         public static async Task PageForEmbedUpdated(
             IOsuWebClient osuWebClient, IBeatmapRepository beatmapRepo, ulong id)
         {
-            if (ActiveEmbeds.ContainsKey(id)){
+            if (ActiveEmbeds.ContainsKey(id))
+            {
                 PlaycountEmbedContext context = ActiveEmbeds[id];
                 int pageNumber = BotClient.Instance.CurrentPageForEmbed[context.Message!.Id];
                 List<BeatmapPlaycount> mostPlayed = await QueryPlaycountBasedOffEmbedContext(
@@ -162,16 +168,25 @@ namespace OSPC.Bot.Component
                 )
                 .WithDescription($"**Settings** - {ConvertToInline("load", "link-profile")}\n**Osu** - {ConvertToInline("most-played", "playcount", "search")}")
                 .Build();
-        
+
         public static Embed BuildHelpEmbedForCommand(string command)
         {
-            switch (command){
-                case "load": return BuildLoadCommandHelpEmbed();
-                case "link-profile": return BuildLinkProfileCommandHelpEmbed();
-                case "most-played": case "mp": return BuildMostPlayedCommandHelpEmbed();
-                case "playcount": case "pc": return BuildPlaycountCommandHelpEmbed();
-                case "search": return BuildSearchCommandHelpEmbed();
-                default: return BuildErrorEmbed($"Command: {command} doesn't exist!");
+            switch (command)
+            {
+                case "load":
+                    return BuildLoadCommandHelpEmbed();
+                case "link-profile":
+                    return BuildLinkProfileCommandHelpEmbed();
+                case "most-played":
+                case "mp":
+                    return BuildMostPlayedCommandHelpEmbed();
+                case "playcount":
+                case "pc":
+                    return BuildPlaycountCommandHelpEmbed();
+                case "search":
+                    return BuildSearchCommandHelpEmbed();
+                default:
+                    return BuildErrorEmbed($"Command: {command} doesn't exist!");
             }
         }
 
@@ -181,7 +196,7 @@ namespace OSPC.Bot.Component
                 ErrorType.InvalidArguments => "Invalid arguments were specified, please see =help {command} for correct format",
                 ErrorType.Parsing => $"An error occurred during parsing: {error.Message}",
                 ErrorType.NotFound => error.Message ?? "Couldn't find what you were looking for",
-                _  => "An unexpected error occured"
+                _ => "An unexpected error occured"
             };
 
         private static Embed BuildLoadCommandHelpEmbed()
@@ -314,28 +329,33 @@ namespace OSPC.Bot.Component
                     ")
                 .Build();
 
-        private static string ConvertToInline(params string[] words) 
+        private static string ConvertToInline(params string[] words)
             => words.Aggregate("", (acc, curr) => acc += $"`{curr}` ");
 
         private static async Task<List<BeatmapPlaycount>> QueryPlaycountBasedOffEmbedContext(
             IOsuWebClient osuWebClient,
             IBeatmapRepository beatmapRepo,
-            PlaycountEmbedContext context, 
-            int pageNumber) 
+            PlaycountEmbedContext context,
+            int pageNumber)
         {
-            if (!context.Filtered) {
+            if (!context.Filtered)
+            {
                 return await osuWebClient.GetBeatmapPlaycountsForUser
-                (context.User.Id, LIMIT, LIMIT * (pageNumber-1));
-            } else {
+                (context.User.Id, LIMIT, LIMIT * (pageNumber - 1));
+            }
+            else
+            {
                 var filterResult = await beatmapRepo.FilterBeatmapPlaycountsForUser(
                     context.SearchParams!,
-                    context.User.Id, 
-                    LIMIT, 
+                    context.User.Id,
+                    LIMIT,
                     pageNumber
                 );
 
-                if (!filterResult.Successful) return [];
-                else return filterResult.Value!;
+                if (!filterResult.Successful)
+                    return [];
+                else
+                    return filterResult.Value!;
             }
         }
     }

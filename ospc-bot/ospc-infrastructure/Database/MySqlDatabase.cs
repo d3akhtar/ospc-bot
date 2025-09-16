@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using MySql.Data.MySqlClient;
+
 using OSPC.Domain.Options;
 using OSPC.Infrastructure.Caching;
 
@@ -22,8 +24,8 @@ namespace OSPC.Infrastructure.Database
         public async Task<T> ExecuteAsync<T>(Func<MySqlConnection, Task<T>> action)
         {
             _logger.LogDebug("Executing MySQL action for type: {@TypeInfo}", typeof(T));
-            
-            await using var connection =  new MySqlConnection(_databaseOptions.Value.ConnectionString);
+
+            await using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
             await connection.OpenAsync();
             return await action(connection);
         }
@@ -32,7 +34,7 @@ namespace OSPC.Infrastructure.Database
         {
             _logger.LogDebug("Executing MySQL action");
 
-            await using var connection =  new MySqlConnection(_databaseOptions.Value.ConnectionString);
+            await using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
             await connection.OpenAsync();
             await action(connection);
         }
@@ -42,23 +44,30 @@ namespace OSPC.Infrastructure.Database
             _logger.LogDebug("Executing MySQL command for type: {@TypeInfo}", typeof(T));
 
             T? res = await _redis.GetQuery<T>(key);
-            if (res is not null) return res;
-            else {
+            if (res is not null)
+                return res;
+            else
+            {
                 _logger.LogDebug("Cache key: {Key} not found, retreiving from database", key);
-                await using var connection =  new MySqlConnection(_databaseOptions.Value.ConnectionString);
+                await using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
                 await connection.OpenAsync();
                 res = await action(connection);
-                if (res != null) await _redis.SaveQuery(key, res);
-                else _logger.LogDebug("Couldn't find anything from database");
+                if (res != null)
+                    await _redis.SaveQuery(key, res);
+                else
+                    _logger.LogDebug("Couldn't find anything from database");
                 return res;
             }
         }
 
         public async Task CommitTransactionAsync(MySqlTransaction transaction)
         {
-            try {
+            try
+            {
                 await transaction.CommitAsync();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 _logger.LogError(e, "Error while commiting, rolling back transaction");
                 await transaction.RollbackAsync();
             }
@@ -67,9 +76,9 @@ namespace OSPC.Infrastructure.Database
         public async Task<bool> ExecuteInsertAsync(List<string> invalidatedKeys, Func<MySqlConnection, Task<bool>> action)
         {
             _logger.LogDebug("Executing MySQL insert command");
-            
+
             await _redis.InvalidateKeys(invalidatedKeys);
-            await using var connection =  new MySqlConnection(_databaseOptions.Value.ConnectionString);
+            await using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
             await connection.OpenAsync();
             return await action(connection);
         }

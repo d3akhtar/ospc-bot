@@ -13,7 +13,8 @@ namespace OSPC.Utils
     public static class ComparisonConverter
     {
         public static string ConvertToString(Comparison comparison)
-            => comparison switch {
+            => comparison switch
+            {
                 Comparison.None => "",
                 Comparison.Less => "<",
                 Comparison.LessOrEqual => "<=",
@@ -25,19 +26,22 @@ namespace OSPC.Utils
 
         public static string CreateComparisonClause(ComparisonFilter filter, string table, string attribute)
         {
-            if (filter == null) return "";
+            if (filter == null)
+                return "";
             else if (filter is SingleFilter s)
                 return $"AND {table}.{attribute}{CreateExpressionForSingleFilter(s)} ";
             else if (filter is BetweenFilter b)
                 return $"AND {table}.{attribute}{CreateExpressionForSingleFilter(b.Min)} AND {table}.{attribute}{CreateExpressionForSingleFilter(b.Max)}";
-            else return "";
+            else
+                return "";
         }
 
         private static string CreateExpressionForSingleFilter(SingleFilter s)
             => $"{ConvertToString(s.Comparison)}{s.Value}";
 
         public static Comparison Convert(string input)
-            => input switch {
+            => input switch
+            {
                 "<" => Comparison.Less,
                 "<=" => Comparison.LessOrEqual,
                 "=" => Comparison.Equal,

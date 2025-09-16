@@ -2,9 +2,12 @@ using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
+
 using MySql.Data.MySqlClient;
+
 using OSPC.Domain.Options;
 using OSPC.Utils;
+
 using Serilog;
 using Serilog.Events;
 
@@ -35,7 +38,7 @@ namespace OSPC.Bot.Logging
                 LogSeverity.Debug => LogEventLevel.Debug,
                 _ => LogEventLevel.Information
             };
-            
+
             Log.Write(severity, message.Exception, "[{Source}] {Message}", message.Source, message.Message);
 
             await Task.CompletedTask;

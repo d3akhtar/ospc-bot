@@ -1,6 +1,8 @@
 using Discord;
 using Discord.Interactions;
+
 using Microsoft.Extensions.Logging;
+
 using OSPC.Bot.Command;
 using OSPC.Bot.Component;
 using OSPC.Bot.Context;
@@ -43,29 +45,34 @@ namespace OSPC.Bot.Module.Interaction
             string username = "",
             int playcount = -1,
             Comparison comparison = Comparison.Equal,
-            string query = "", 
+            string query = "",
             string artist = "",
             string title = "",
             bool exact = false,
             [Summary(name:"beatmap-filter", description: "Filter beatmaps similar to how you would do so in osu. Use the /help command for details")]
             string beatmapFilterStr = "")
         {
-            var beatmapFilterParseResult =  BeatmapFilter.Parse(beatmapFilterStr);
-            if (!beatmapFilterParseResult.Successful) {
+            var beatmapFilterParseResult = BeatmapFilter.Parse(beatmapFilterStr);
+            if (!beatmapFilterParseResult.Successful)
+            {
                 await RespondErrorAsync(beatmapFilterParseResult.Error!);
                 return;
             }
 
-            if (!string.IsNullOrEmpty(username) && !RegexPatterns.StrictUsernameRegex.IsMatch(username)) await RespondErrorAsync(Errors.Parsing("Invalid username format!"));
-            else if (UnfilledQuery(query, artist, title, playcount, comparison)) await RespondErrorAsync(Errors.InvalidArguments("Either fill only the query, or fill one or both of artist and title"));  
-            else {
-                SearchParams searchParams = new() {
-                     Username = username,
-                     Query = query,
-                     Artist = artist,
-                     Title = title,
-                     Exact = exact,
-                     BeatmapFilter = beatmapFilterParseResult.Value!
+            if (!string.IsNullOrEmpty(username) && !RegexPatterns.StrictUsernameRegex.IsMatch(username))
+                await RespondErrorAsync(Errors.Parsing("Invalid username format!"));
+            else if (UnfilledQuery(query, artist, title, playcount, comparison))
+                await RespondErrorAsync(Errors.InvalidArguments("Either fill only the query, or fill one or both of artist and title"));
+            else
+            {
+                SearchParams searchParams = new()
+                {
+                    Username = username,
+                    Query = query,
+                    Artist = artist,
+                    Title = title,
+                    Exact = exact,
+                    BeatmapFilter = beatmapFilterParseResult.Value!
                 };
 
                 await RespondBotCommandResultAsync(await _botCmds.Search(Context.GetOsuContext(), searchParams));
