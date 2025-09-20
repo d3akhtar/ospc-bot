@@ -5,6 +5,7 @@ using MySql.Data.MySqlClient;
 
 using OSPC.Domain.Options;
 using OSPC.Infrastructure.Caching;
+using OSPC.Utils;
 
 namespace OSPC.Infrastructure.Database
 {
@@ -39,24 +40,25 @@ namespace OSPC.Infrastructure.Database
             await action(connection);
         }
 
-        public async Task<T> ExecuteCommandAsync<T>(string key, Func<MySqlConnection, Task<T>> action)
+        public async Task<Result<T>> ExecuteCommandAsync<T>(string key, Func<MySqlConnection, Task<Result<T>>> action)
         {
             _logger.LogDebug("Executing MySQL command for type: {@TypeInfo}", typeof(T));
 
-            T? res = await _redis.GetQuery<T>(key);
-            if (res is not null)
-                return res;
+            if (await _redis.GetQuery<T?>(key) is {} cachedResult)
+                return cachedResult;
             else
             {
                 _logger.LogDebug("Cache key: {Key} not found, retreiving from database", key);
                 await using var connection = new MySqlConnection(_databaseOptions.Value.ConnectionString);
                 await connection.OpenAsync();
-                res = await action(connection);
-                if (res != null)
-                    await _redis.SaveQuery(key, res);
+                var result = await action(connection);
+                if (result.Successful)
+                    await _redis.SaveQuery(key, result.Value);
                 else
                     _logger.LogDebug("Couldn't find anything from database");
-                return res;
+
+                _logger.LogDebug("Returning result for MYSQL command: {@Result}", result);
+                return result;
             }
         }
 

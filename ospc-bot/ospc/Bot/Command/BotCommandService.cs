@@ -67,7 +67,7 @@ namespace OSPC.Bot.Command
                 if (!beatmapIdResult.Successful)
                     return CommandResult.Error(beatmapIdResult.Error!);
                 else
-                    beatmapId = beatmapIdResult.Value!;
+                    beatmapId = (int)beatmapIdResult.Value!;
             }
 
             var bpcResult = await _beatmapRepo.GetBeatmapPlaycountForUserOnMap(userResult.Value!.Id, beatmapId);
@@ -107,8 +107,8 @@ namespace OSPC.Bot.Command
                 Filtered = true,
                 General = !string.IsNullOrEmpty(searchParams.Query),
                 SearchParams = searchParams,
-                ResultCount = resCountResult.Value,
-                TotalPages = (resCountResult.Value / LIMIT) + 1
+                ResultCount = (int)resCountResult.Value!,
+                TotalPages = ((int)resCountResult.Value / LIMIT) + 1
             };
             var embed = Embeded.GetEmbedForBeatmapPlaycount(1, filteredMostPlayedResult.Value!, userResult.Value, embedContext, stats);
 
