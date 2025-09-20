@@ -1,4 +1,11 @@
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+    
 name: CI
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,8 +35,44 @@ jobs:
       with:
         name: format-report
         path: format-report.json
-        retention-days: 5
-            
+
+  tests:
+    name: Run Tests With Coverage
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: "8.0.x"
+
+    - name: Install dependencies
+      run: dotnet restore
+
+    - name: Install reporting tools
+      run: dotnet tool install --global dotnet-coverage && dotnet tool install --global dotnet-reportgenerator-globaltool
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Run unit tests
+      run: dotnet test --collect:"Code Coverage;Format=Cobertura" --settings ./.settings/coverage.runsettings --results-directory ./TestResults 
+
+    - name: Generate coverage report
+      run: |
+        reportgenerator \
+          -reports:"./TestResults/*/*.cobertura.xml" \
+          -targetdir:coveragereport \
+          -reporttypes:Html
+
+    - name: Upload results
+      uses: actions/upload-artifact@v4
+      with:
+        name: coveragereport
+        path: ./coveragereport
+    
+                
   build:
     name: build-${{matrix.os}}
     runs-on: ${{ matrix.os }}
