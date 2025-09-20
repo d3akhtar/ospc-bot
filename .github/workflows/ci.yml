@@ -5,9 +5,31 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  content: read
+  contents: read
 
 jobs:
+  check-code-format:
+    name: Check Code Format
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: "9.0.x"
+    - name: Install dotnet-format
+      run: dotnet tool install -g dotnet-format
+    - name: Check format
+      run: dotnet format --verify-no-changes --report ./format-report.json
+      continue-on-error: true
+    - name: Upload format check report
+      uses: actions/upload-artifact@v4
+      with:
+        name: format-report
+        path: format-report.json
+        retention-days: 5
+            
   build:
     name: build-${{matrix.os}}
     runs-on: ${{ matrix.os }}
@@ -21,7 +43,7 @@ jobs:
     - name: Setup
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: "8.0.x"
+        dotnet-version: "9.0.x"
 
     - name: Install dependencies
       run: dotnet restore
