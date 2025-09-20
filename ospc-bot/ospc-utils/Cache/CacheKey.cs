@@ -15,7 +15,8 @@ namespace OSPC.Utils.Cache
             { typeof(BeatmapPlaycount), "bpc" },
             { typeof(List<BeatmapPlaycount>), "bpc_list"},
             { typeof(BeatmapSet), "bs" },
-            { typeof(int), "num" }
+            { typeof(int), "num" },
+            { typeof(int?), "num" }
         };
 
         public static string ConvertTypeToKey<T>(params (object? Val, string Name)[] queryArgs)

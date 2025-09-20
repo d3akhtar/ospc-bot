@@ -13,12 +13,12 @@ namespace OSPC.Infrastructure.Database.Repository
         public Task<Result<BeatmapPlaycount>> GetBeatmapPlaycountForUserOnMap(int userId, int beatmapId);
         public Task<Result<List<BeatmapPlaycount>>> FilterBeatmapPlaycountsForUser
             (SearchParams searchParams, int userId, int pageSize, int pageNumber);
-        public Task<Result<int>> GetTotalResultCountForSearch(SearchParams searchParams, int userId);
-        public Task<Result<int>> GetPlaycountForBeatmap(int userId, int beatmapId);
+        public Task<Result<int?>> GetTotalResultCountForSearch(SearchParams searchParams, int userId);
+        public Task<Result<int?>> GetPlaycountForBeatmap(int userId, int beatmapId);
         public Task<Result<Beatmap>> GetBeatmapById(int id);
         public Task<Result<BeatmapSet>> GetBeatmapSetById(int id);
         public Task<List<int>> GetRemainingBeatmapIds(HashSet<int> beatmapIds);
         public Task UpdateReferencedBeatmapIdForChannel(ulong channelId, int beatmapId);
-        public Task<Result<int>> GetReferencedBeatmapIdForChannel(ulong channelId);
+        public Task<Result<int?>> GetReferencedBeatmapIdForChannel(ulong channelId);
     }
 }

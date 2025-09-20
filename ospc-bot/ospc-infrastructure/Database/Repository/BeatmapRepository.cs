@@ -85,7 +85,7 @@ namespace OSPC.Infrastructure.Database.Repository
                     (searchParams.BeatmapFilter, "beatmapFilter")
             );
 
-            return await _db.ExecuteCommandAsync<Result<List<BeatmapPlaycount>>>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<List<BeatmapPlaycount>>(key, async (conn) =>
             {
                 List<BeatmapPlaycount> res = new();
                 var result = _commandFactory.CreateBeatmapPlaycountFilterCommand(conn, searchParams, userId, pageSize, pageNumber);
@@ -110,7 +110,7 @@ namespace OSPC.Infrastructure.Database.Repository
             _logger.LogDebug("Getting beatmap with id: {BeatmapId}", id);
 
             string key = CacheKey.ConvertTypeToKey<Beatmap>((id, "mapid"));
-            return await _db.ExecuteCommandAsync<Result<Beatmap>>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<Beatmap>(key, async (conn) =>
             {
                 var result = _commandFactory.CreateGetBeatmapByIdCommand(conn, id);
                 if (!result.Successful)
@@ -137,7 +137,7 @@ namespace OSPC.Infrastructure.Database.Repository
             _logger.LogDebug("Getting beatmapset with id: {BeatmapSetId}", id);
 
             string key = CacheKey.ConvertTypeToKey<BeatmapSet>((id, "setid"));
-            return await _db.ExecuteCommandAsync<Result<BeatmapSet>>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<BeatmapSet>(key, async (conn) =>
             {
                 var result = _commandFactory.CreateGetBeatmapSetByIdCommand(conn, id);
                 if (!result.Successful)
@@ -156,7 +156,7 @@ namespace OSPC.Infrastructure.Database.Repository
             });
         }
 
-        public async Task<Result<int>> GetPlaycountForBeatmap(int userId, int beatmapId)
+        public async Task<Result<int?>> GetPlaycountForBeatmap(int userId, int beatmapId)
         {
             _logger.LogDebug("Get playcount for userId: {UserId} on beatmapId: {BeatmapId}", userId, beatmapId);
             var bpcResult = await GetBeatmapPlaycountForUserOnMap(userId, beatmapId);
@@ -172,7 +172,7 @@ namespace OSPC.Infrastructure.Database.Repository
             _logger.LogDebug("Get beatmap playcount info for userId: {UserId} on beatmapId: {BeatmapId}", userId, beatmapId);
 
             string key = CacheKey.ConvertTypeToKey<BeatmapPlaycount>((userId, "pc_userid"), (beatmapId, "pc_mapid"));
-            return await _db.ExecuteCommandAsync<Result<BeatmapPlaycount>>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<BeatmapPlaycount>(key, async (conn) =>
             {
                 var result = _commandFactory.CreateGetBeatmapPlaycountForUserCommand(conn, userId, beatmapId);
                 if (!result.Successful)
@@ -195,7 +195,7 @@ namespace OSPC.Infrastructure.Database.Repository
         {
             _logger.LogDebug("Updating channelId: {ChannelId} last referenced beatmapId: {BeatmapId}", channelId, beatmapId);
 
-            List<string> invalidatedKeys = [CacheKey.ConvertTypeToKey<int>((channelId, "channelId"))];
+            List<string> invalidatedKeys = [CacheKey.ConvertTypeToKey<int?>((channelId, "channelId"))];
             await _db.ExecuteInsertAsync(invalidatedKeys, async (conn) =>
             {
                 var result = _commandFactory.CreateUpdateReferencedBeatmapIdForChannelCommand(conn, channelId, beatmapId);
@@ -210,12 +210,12 @@ namespace OSPC.Infrastructure.Database.Repository
             });
         }
 
-        public async Task<Result<int>> GetReferencedBeatmapIdForChannel(ulong channelId)
+        public async Task<Result<int?>> GetReferencedBeatmapIdForChannel(ulong channelId)
         {
             _logger.LogDebug("Get referenced beatmapId for channelId: {ChannelId}", channelId);
 
-            return await _db.ExecuteCommandAsync<Result<int>>(
-                CacheKey.ConvertTypeToKey<int>((channelId, "channelId")),
+            return await _db.ExecuteCommandAsync<int?>(
+                CacheKey.ConvertTypeToKey<int?>((channelId, "channelId")),
                 async (conn) =>
                 {
                     var result = _commandFactory.CreateGetReferencedBeatmapIdForChannelCommand(conn, channelId);
@@ -235,7 +235,7 @@ namespace OSPC.Infrastructure.Database.Repository
                 });
         }
 
-        public async Task<Result<int>> GetTotalResultCountForSearch(SearchParams searchParams, int userId)
+        public async Task<Result<int?>> GetTotalResultCountForSearch(SearchParams searchParams, int userId)
         {
             _logger.LogDebug("Get userId: {UserId} total amount of results for searchParams: {@SearchParams}", userId, searchParams);
 
@@ -248,7 +248,7 @@ namespace OSPC.Infrastructure.Database.Repository
                     (searchParams.Exact, "exact"),
                     (searchParams.BeatmapFilter, "beatmapFilter")
             );
-            return await _db.ExecuteCommandAsync<Result<int>>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<int?>(key, async (conn) =>
             {
                 var result = _commandFactory.CreateBeatmapPlaycountFilterCommand(conn, searchParams, userId);
                 if (!result.Successful)

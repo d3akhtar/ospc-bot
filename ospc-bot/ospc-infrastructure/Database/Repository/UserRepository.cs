@@ -50,7 +50,7 @@ namespace OSPC.Infrastructure.Database.Repository
             _logger.LogDebug("Getting player info with discordUserId: {DiscordUserId}", discordUserId);
 
             string key = CacheKey.ConvertTypeToKey<DiscordPlayer>((discordUserId, "discId"));
-            return await _db.ExecuteCommandAsync<Result<DiscordPlayer>>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<DiscordPlayer>(key, async (conn) =>
             {
                 var result = _commandFactory.CreateGetPlayerInfoFromDiscordIdCommand(conn, discordUserId);
                 if (result.Successful)
@@ -87,7 +87,7 @@ namespace OSPC.Infrastructure.Database.Repository
             _logger.LogDebug("Getting user with id: {UserId}", id);
 
             string key = CacheKey.ConvertTypeToKey<User>((id, "osuid"));
-            return await _db.ExecuteCommandAsync<Result<User>>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<User>(key, async (conn) =>
             {
                 var result = _commandFactory.CreateGetUserByIdCommand(conn, id);
                 if (result.Successful)
@@ -106,7 +106,7 @@ namespace OSPC.Infrastructure.Database.Repository
             _logger.LogDebug("Getting user info for {Username}", username);
 
             string key = CacheKey.ConvertTypeToKey<User>((username, "osuign"));
-            return await _db.ExecuteCommandAsync<Result<User>>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<User>(key, async (conn) =>
             {
                 var result = _commandFactory.CreateGetUserByUsernameCommand(conn, username);
                 if (result.Successful)
@@ -125,7 +125,7 @@ namespace OSPC.Infrastructure.Database.Repository
             _logger.LogDebug("Getting user with discordUserId: {DiscordUserId}", discordUserId);
 
             string key = CacheKey.ConvertTypeToKey<User>((discordUserId, "discId"));
-            return await _db.ExecuteCommandAsync<Result<User>>(key, async (conn) =>
+            return await _db.ExecuteCommandAsync<User>(key, async (conn) =>
             {
                 var result = _commandFactory.CreateGetUserWithDiscordIdCommand(conn, discordUserId);
                 if (result.Successful)
