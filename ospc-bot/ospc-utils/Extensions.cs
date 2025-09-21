@@ -33,7 +33,7 @@ namespace OSPC.Utils
         {
             serviceCollection
                 .AddOptions<T>()
-                .Bind(config.GetSection(T.GetOptionName()))
+                .Bind(config.GetSection(T.Name))
                 .ValidateDataAnnotations();
 
             return serviceCollection;

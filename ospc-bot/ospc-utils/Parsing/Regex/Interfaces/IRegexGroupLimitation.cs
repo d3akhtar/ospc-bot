@@ -8,6 +8,6 @@ namespace OSPC.Utils.Parsing.RegularExpressions.Interfaces
         public string GroupName { get; set; }
         public bool Passes(List<Group> groups);
         public bool Passes(MatchCollection matchCollection);
-        public string ErrorMessage();
+        public string ErrorMessage { get; }
     }
 }

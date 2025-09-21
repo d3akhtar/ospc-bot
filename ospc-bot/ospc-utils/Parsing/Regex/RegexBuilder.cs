@@ -40,7 +40,7 @@ namespace OSPC.Utils.Parsing.RegularExpressions
                 foreach (var limitation in Limitations.Where(l => !l.NeedsOtherGroups))
                 {
                     if (!limitation.Passes(matches))
-                        return Errors.Parsing(limitation.ErrorMessage());
+                        return Errors.Parsing(limitation.ErrorMessage);
                 }
 
                 if (matches.Count > 0)
@@ -216,7 +216,7 @@ namespace OSPC.Utils.Parsing.RegularExpressions
             foreach (var limitation in _limitations.Where(l => l.NeedsOtherGroups))
             {
                 if (!limitation.Passes(successfulGroups))
-                    return MatchResult.Error(limitation.ErrorMessage());
+                    return MatchResult.Error(limitation.ErrorMessage);
             }
 
             return MatchResult.Success(matchedValues, input);
