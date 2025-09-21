@@ -26,7 +26,7 @@ namespace OSPC.Utils
 
         public static string CreateComparisonClause(ComparisonFilter filter, string table, string attribute)
         {
-            if (filter == null)
+            if (filter is null)
                 return "";
             else if (filter is SingleFilter s)
                 return $"AND {table}.{attribute}{CreateExpressionForSingleFilter(s)} ";

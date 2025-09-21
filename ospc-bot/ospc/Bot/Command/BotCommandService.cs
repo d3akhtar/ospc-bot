@@ -54,14 +54,14 @@ namespace OSPC.Bot.Command
         {
             _logger.LogInformation("Getting playcount for {Username} on {BeatmapId} with context: {@Ctx}", username, beatmapId, ctx);
 
-            if (!string.IsNullOrEmpty(username) && !RegexPatterns.StrictUsernameRegex.IsMatch(username))
+            if (username is not Unspecified.User && !RegexPatterns.StrictUsernameRegex.IsMatch(username))
                 return CommandResult.Error("Invalid username format!");
 
             var userResult = await _userSearch.SearchUser(username, ctx);
             if (!userResult.Successful)
                 return CommandResult.Error(userResult.Error!);
 
-            if (beatmapId == -1)
+            if (beatmapId is Unspecified.Beatmap)
             {
                 var beatmapIdResult = await _beatmapRepo.GetReferencedBeatmapIdForChannel(ctx.ChannelId);
                 if (!beatmapIdResult.Successful)
@@ -105,7 +105,7 @@ namespace OSPC.Bot.Command
             {
                 User = userResult.Value,
                 Filtered = true,
-                General = !string.IsNullOrEmpty(searchParams.Query),
+                General = searchParams.Query is not Unspecified.Query,
                 SearchParams = searchParams,
                 ResultCount = (int)resCountResult.Value!,
                 TotalPages = ((int)resCountResult.Value / LIMIT) + 1

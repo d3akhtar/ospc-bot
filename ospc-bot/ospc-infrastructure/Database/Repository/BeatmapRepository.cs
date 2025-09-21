@@ -250,7 +250,7 @@ namespace OSPC.Infrastructure.Database.Repository
             );
             return await _db.ExecuteCommandAsync<int?>(key, async (conn) =>
             {
-                var result = _commandFactory.CreateBeatmapPlaycountFilterCommand(conn, searchParams, userId);
+                var result = _commandFactory.CreateBeatmapPlaycountFilterResultCountCommand(conn, searchParams, userId);
                 if (!result.Successful)
                     return result.Error!;
 

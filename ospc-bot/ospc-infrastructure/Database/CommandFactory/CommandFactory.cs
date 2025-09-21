@@ -239,21 +239,23 @@ namespace OSPC.Infrastructure.Database.CommandFactory
             }
         }
 
-        public Result<MySqlCommand> CreateBeatmapPlaycountFilterCommand(MySqlConnection conn, SearchParams searchParams, int userId, int pageSize = -1, int pageNumber = -1)
+        public Result<MySqlCommand> CreateBeatmapPlaycountFilterCommand(MySqlConnection conn, SearchParams searchParams, int userId, int pageSize, int pageNumber)
         {
             LogCommandCreation(new { SearchParams = searchParams, UserId = userId, PageSize = pageSize, PageNumber = pageNumber });
+            return GetNewCommandWithConnection(conn, CreateFilterQuery(searchParams, userId, pageSize, pageNumber));
+        }
 
+        public Result<MySqlCommand> CreateBeatmapPlaycountFilterResultCountCommand(MySqlConnection conn, SearchParams searchParams, int userId)
+        {
+            LogCommandCreation(new { SearchParams = searchParams, UserId = userId });
+            return GetNewCommandWithConnection(conn, CreateFilterResultCountQuery(searchParams, userId));
+        }
+
+        private Result<MySqlCommand> GetNewCommandWithConnection(MySqlConnection conn, MySqlCommand command)
+        {            
             try
             {
-                (string query, bool generalQuery) = CreateFilterQuery(searchParams, userId, pageSize, pageNumber);
-                MySqlCommand command = new MySqlCommand(query, conn);
-                if (generalQuery)
-                    command.Parameters.AddWithValue("@query", searchParams.Query);
-                else
-                {
-                    command.Parameters.AddWithValue("@artist", searchParams.Artist ?? string.Empty);
-                    command.Parameters.AddWithValue("@title", searchParams.Title ?? string.Empty);
-                }
+                command.Connection = conn;
                 return command;
             }
             catch (MySqlException ex)
@@ -288,38 +290,11 @@ namespace OSPC.Infrastructure.Database.CommandFactory
             }
         }
 
-        private (string, bool) CreateFilterQuery(SearchParams searchParams, int userId, int pageSize, int pageNumber)
-        {
-            bool countQuery = pageSize == -1 || pageNumber == -1;
-            bool generalQuery = string.IsNullOrEmpty(searchParams.Artist) && string.IsNullOrEmpty(searchParams.Title);
-            string artistConcat = generalQuery ? (searchParams.Exact && searchParams.Query != "" ? "" : "%") : (searchParams.Exact && searchParams.Artist != "" ? "" : "%");
-            string titleConcat = generalQuery ? (searchParams.Exact && searchParams.Query != "" ? "" : "%") : (searchParams.Exact && searchParams.Title != "" ? "" : "%");
-            string countComparison = ComparisonConverter.CreateComparisonClause(searchParams.Playcount!, "BeatmapPlaycounts", "Count");
-            string query = $@"
-                    SELECT {(countQuery ? "COUNT(BeatmapPlaycounts.Count)" : "BeatmapPlaycounts.*,Beatmaps.Id,Beatmaps.Version,Beatmaps.DifficultyRating,Beatmaps.BeatmapSetId,BeatmapSet.*")}
-                    FROM BeatmapPlaycounts
-                    JOIN Beatmaps ON BeatmapPlaycounts.BeatmapId = Beatmaps.Id 
-                    JOIN BeatmapSet ON Beatmaps.BeatmapSetId = BeatmapSet.Id 
-                    WHERE BeatmapPlaycounts.UserId = {userId}
-                    {countComparison}
-                    AND (
-                        BeatmapSet.Title LIKE CONCAT('{titleConcat}', {(generalQuery ? "@query" : "@title")}, '{titleConcat}') 
-                        {(generalQuery ? "OR" : "AND")} 
-                        BeatmapSet.Artist LIKE CONCAT('{artistConcat}', {(generalQuery ? "@query" : "@artist")}, '{artistConcat}')
-                    )
-                    {(searchParams.BeatmapFilter == null ? "" : searchParams.BeatmapFilter.GetClause())}
-                    {(
-                        countQuery ? "" :
-                        $@"
-                            ORDER BY BeatmapPlaycounts.Count DESC
-                            LIMIT {pageSize}
-                            OFFSET {(pageNumber - 1) * pageSize}
-                        "
-                    )}
-                ";
+        private MySqlCommand CreateFilterQuery(SearchParams searchParams, int userId, int pageSize, int pageNumber)
+            => searchParams.GetFilterQueryCommand(userId, pageSize, pageNumber);
 
-            return (query, generalQuery);
-        }
+        private MySqlCommand CreateFilterResultCountQuery(SearchParams searchParams, int userId)
+            => searchParams.GetFilterResultCountQueryCommand(userId);
 
         private void LogCommandCreation(object arguments, [CallerMemberName] string? methodName = null)
             => _logger.LogDebug("Creating command from method: {MethodName} with arguments: {@Arguments}", methodName, arguments);

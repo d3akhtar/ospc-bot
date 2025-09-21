@@ -20,6 +20,7 @@ namespace OSPC.Infrastructure.Database.CommandFactory
         public Result<MySqlCommand> CreateGetUserByIdCommand(MySqlConnection conn, int userId);
         public Result<MySqlCommand> CreateGetUserByUsernameCommand(MySqlConnection conn, string username);
         public Result<MySqlCommand> CreateGetUserWithDiscordIdCommand(MySqlConnection conn, ulong discordUserId);
-        public Result<MySqlCommand> CreateBeatmapPlaycountFilterCommand(MySqlConnection conn, SearchParams searchParams, int userId, int pageSize = -1, int pageNumber = -1);
+        public Result<MySqlCommand> CreateBeatmapPlaycountFilterCommand(MySqlConnection conn, SearchParams searchParams, int userId, int pageSize, int pageNumber);
+        public Result<MySqlCommand> CreateBeatmapPlaycountFilterResultCountCommand(MySqlConnection conn, SearchParams searchParams, int userId);
     }
 }

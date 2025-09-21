@@ -122,11 +122,7 @@ namespace OSPC.Infrastructure.Http
             if (res.IsSuccessStatusCode)
             {
                 var json = await res.Content.ReadAsStringAsync();
-
-                // TODO: Move this to UserRankStatistic
-                using JsonDocument doc = JsonDocument.Parse(json);
-                JsonElement statistic = doc.RootElement.GetProperty("statistics");
-                stat = JsonSerializer.Deserialize<UserRankStatistic>(statistic.GetRawText());
+                stat = UserRankStatistic.FromJsonString(json);
                 await _redis.SaveUserRankStatisticAsync(userId, stat!);
                 return stat;
             }
@@ -192,7 +188,7 @@ namespace OSPC.Infrastructure.Http
             try
             {
                 string? accessToken = await _redis.GetAccessTokenAsync();
-                if (accessToken == null)
+                if (accessToken is null)
                 {
                     var credentials = await GetClientCredentials();
                     await _redis.SetAccessTokenAsync(credentials.AccessToken, credentials.ExpiresIn);

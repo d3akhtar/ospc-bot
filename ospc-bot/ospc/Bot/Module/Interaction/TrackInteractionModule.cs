@@ -37,20 +37,20 @@ namespace OSPC.Bot.Module.Interaction
             => await RespondBotCommandResultAsync(await _botCmds.GetMostPlayed(Context.GetOsuContext(), username));
 
         [SlashCommand("playcount", "Get the playcount on a beatmap for a user")]
-        public async Task GetPlaycount(string username = "", int beatmapId = -1)
+        public async Task GetPlaycount(string username = Unspecified.User, int beatmapId = Unspecified.Beatmap)
             => await RespondBotCommandResultAsync(await _botCmds.GetPlaycount(Context.GetOsuContext(), username, beatmapId));
 
         [SlashCommand("search", "Search for beatmaps in most played")]
         public async Task Search(
-            string username = "",
-            int playcount = -1,
+            string username = Unspecified.User,
+            int playcount = Unspecified.Playcount,
             Comparison comparison = Comparison.Equal,
-            string query = "",
-            string artist = "",
-            string title = "",
+            string query = Unspecified.Query,
+            string artist = Unspecified.Artist,
+            string title = Unspecified.Title,
             bool exact = false,
             [Summary(name:"beatmap-filter", description: "Filter beatmaps similar to how you would do so in osu. Use the /help command for details")]
-            string beatmapFilterStr = "")
+            string beatmapFilterStr = Unspecified.BeatmapFilterText)
         {
             var beatmapFilterParseResult = BeatmapFilter.Parse(beatmapFilterStr);
             if (!beatmapFilterParseResult.Successful)
@@ -59,7 +59,7 @@ namespace OSPC.Bot.Module.Interaction
                 return;
             }
 
-            if (!string.IsNullOrEmpty(username) && !RegexPatterns.StrictUsernameRegex.IsMatch(username))
+            if (username is not Unspecified.User && !RegexPatterns.StrictUsernameRegex.IsMatch(username))
                 await RespondErrorAsync(Errors.Parsing("Invalid username format!"));
             else if (UnfilledQuery(query, artist, title, playcount, comparison))
                 await RespondErrorAsync(Errors.InvalidArguments("Either fill only the query, or fill one or both of artist and title"));
@@ -80,6 +80,10 @@ namespace OSPC.Bot.Module.Interaction
         }
 
         private bool UnfilledQuery(string query, string artist, string title, int playcount, Comparison comparison)
-            => string.IsNullOrEmpty(query) && query == artist && artist == title && playcount == -1 && comparison == Comparison.None;
+            => query is Unspecified.Query &&
+                artist is Unspecified.Artist &&
+                title is Unspecified.Title &&
+                playcount is Unspecified.Playcount &&
+                comparison is Comparison.None;                
     }
 }

@@ -41,7 +41,7 @@ namespace OSPC.Bot.Module.Info
         [Command("pc")]
         [Summary("Get the playcount on a beatmap for a user")]
         public async Task GetPlaycount()
-            => await ReplyBotCommandResultAsync(await _botCmds.GetPlaycount(Context.GetOsuContext(), User.Unspecified, Beatmap.Unspecified));
+            => await ReplyBotCommandResultAsync(await _botCmds.GetPlaycount(Context.GetOsuContext(), Unspecified.User, Unspecified.Beatmap));
 
         [Command("pc")]
         [Summary("Get the playcount on a beatmap for a user")]
@@ -61,7 +61,7 @@ namespace OSPC.Bot.Module.Info
         [Command("pc")]
         [Summary("Get the playcount on a beatmap for a user")]
         public async Task GetPlaycount(int beatmapId)
-            => await ReplyBotCommandResultAsync(await _botCmds.GetPlaycount(Context.GetOsuContext(), User.Unspecified, beatmapId));
+            => await ReplyBotCommandResultAsync(await _botCmds.GetPlaycount(Context.GetOsuContext(), Unspecified.User, beatmapId));
 
         [Command("search")]
         [Summary("Search for beatmaps in most-played")]
@@ -78,13 +78,13 @@ namespace OSPC.Bot.Module.Info
             => await Embeded.PageForEmbedUpdated(_osuWebClient, _beatmapRepo, id);
 
         [Command("most-played")]
-        public async Task MostPlayed(string username = "")
+        public async Task MostPlayed(string username = Unspecified.User)
             => await ReplyBotCommandResultAsync(await _botCmds.GetMostPlayed(Context.GetOsuContext(), username));
 
         private bool TryParseUsernameOrBeatmap(string usernameOrBeatmap, out string username, out int beatmapId)
         {
-            username = User.Unspecified;
-            beatmapId = Beatmap.Unspecified;
+            username = Unspecified.User;
+            beatmapId = Unspecified.Beatmap;
 
             var match = RegexPatterns.OsuBeatmapLinkRegex.Match(usernameOrBeatmap);
 

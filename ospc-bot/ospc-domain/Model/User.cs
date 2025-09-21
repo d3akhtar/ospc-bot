@@ -4,7 +4,6 @@ namespace OSPC.Domain.Model
 {
     public class User
     {
-        public static string Unspecified = string.Empty;
         private static readonly string _profileUrlBase = "https://osu.ppy.sh/users/";
 
         public int Id { get; set; }

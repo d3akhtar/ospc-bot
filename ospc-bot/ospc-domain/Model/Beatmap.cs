@@ -4,8 +4,6 @@ namespace OSPC.Domain.Model
 {
     public class Beatmap
     {
-        public static int Unspecified = -1;
-
         public int Id { get; set; }
         [JsonPropertyName("beatmapset_id")]
         public int BeatmapSetId { get; set; }

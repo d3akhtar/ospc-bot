@@ -19,7 +19,7 @@ namespace OSPC.Bot.Module.Interaction
         }
 
         [SlashCommand("load", "Load beatmap playcounts for a user")]
-        public async Task LoadBeatmapPlaycounts(string username = "")
+        public async Task LoadBeatmapPlaycounts(string username = Unspecified.User)
             => await RespondBotCommandResultAsync(await _botCmds.LoadBeatmapPlaycounts(Context.GetOsuContext(), username));
 
         [SlashCommand("link-profile", "Link your osu profile")]
@@ -27,9 +27,9 @@ namespace OSPC.Bot.Module.Interaction
             => await RespondBotCommandResultAsync(await _botCmds.LoadBeatmapPlaycounts(Context.GetOsuContext(), username));
 
         [SlashCommand("help", "Get help about commands and what they do")]
-        public async Task Help(string command = "")
+        public async Task Help(string command = Unspecified.BotCommand)
         {
-            if (string.IsNullOrEmpty(command))
+            if (command is Unspecified.BotCommand)
                 await RespondAsync(embed: Embeded.BuildHelpEmbed(), ephemeral: true);
             else
                 await RespondAsync(embed: Embeded.BuildHelpEmbedForCommand(command), ephemeral: true);
