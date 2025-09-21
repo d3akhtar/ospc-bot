@@ -1,0 +1,30 @@
+on:
+  pull_request:
+    branches:
+    - main
+
+name: Lint Check
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint-check:
+    name: Check PR Title
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Install jq
+      run: sudo apt-get update && sudo apt-get install -y jq
+    - name: Make lint check script (lint-check.sh) executable
+      run: chmod +x scripts/lint-check.sh
+    - name: Check PR Title
+      shell: bash
+      env:
+        TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+        TRELLO_API_TOKEN: ${{ secrets.TRELLO_API_TOKEN }}
+      run: scripts/lint-check.sh ${{ github.event.pull_request.title }}
