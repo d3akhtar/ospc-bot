@@ -51,7 +51,7 @@ namespace OSPC.Infrastructure.Caching
 
             string? res = await _cache.StringGetAsync(key);
 
-            if (res == null)
+            if (res is null)
             {
                 _logger.LogDebug("Item with key: {Key} not found in cache", key);
                 return default;

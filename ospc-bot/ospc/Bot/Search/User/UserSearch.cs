@@ -24,7 +24,7 @@ namespace OSPC.Bot.Search.UserSearch
         {
             _logger.LogDebug("Searching for user using username: {Username} and context: {@ChannelOsuContext}", username, channelOsuContext);
 
-            var userResult = channelOsuContext != null && username == User.Unspecified ?
+            var userResult = channelOsuContext is not null && username is Unspecified.User ?
                 await _userRepo.GetUserWithDiscordId(channelOsuContext.DiscordUserId) :
                 await _userRepo.GetUserByUsername(username);
 

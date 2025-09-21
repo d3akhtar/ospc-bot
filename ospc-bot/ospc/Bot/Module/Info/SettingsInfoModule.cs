@@ -20,7 +20,7 @@ namespace OSPC.Bot.Module.Info
 
         [Command("load")]
         [Summary("Load beatmap playcounts for a user")]
-        public async Task LoadBeatmapPlaycounts(string username = "")
+        public async Task LoadBeatmapPlaycounts(string username = Unspecified.User)
             => await ReplyBotCommandResultAsync(await _botCmds.LoadBeatmapPlaycounts(Context.GetOsuContext(), username));
 
         [Command("link-profile")]
@@ -28,9 +28,9 @@ namespace OSPC.Bot.Module.Info
             => await ReplyBotCommandResultAsync(await _botCmds.LinkProfile(Context.GetOsuContext(), username));
 
         [Command("help")]
-        public async Task Help(string command = "")
+        public async Task Help(string command = Unspecified.BotCommand)
         {
-            if (string.IsNullOrEmpty(command))
+            if (command is Unspecified.BotCommand)
                 await ReplyAsync(embed: Embeded.BuildHelpEmbed());
             else
                 await ReplyAsync(embed: Embeded.BuildHelpEmbedForCommand(command));

@@ -123,7 +123,7 @@ namespace OSPC.Tests.Unit
             await _beatmapRepo.GetTotalResultCountForSearch(SearchParams.ForMostPlayed("opensand"), 1);
             Assert.Empty(_transactionFactoryMock.Invocations);
             _loggerMock.Verify(LogLevel.Debug, Times.Exactly(1));
-            _commandFactoryMock.Verify(cf => cf.CreateBeatmapPlaycountFilterCommand(It.IsAny<MySqlConnection>(), It.IsAny<SearchParams>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Exactly(1));
+            _commandFactoryMock.Verify(cf => cf.CreateBeatmapPlaycountFilterResultCountCommand(It.IsAny<MySqlConnection>(), It.IsAny<SearchParams>(), It.IsAny<int>()), Times.Exactly(1));
         }
     }
 }

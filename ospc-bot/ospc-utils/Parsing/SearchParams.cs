@@ -1,3 +1,4 @@
+using MySql.Data.MySqlClient;
 using OSPC.Utils.Parsing.RegularExpressions;
 using OSPC.Utils.Parsing.RegularExpressions.Limitations;
 using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
@@ -9,9 +10,9 @@ namespace OSPC.Utils.Parsing
 {
     public class SearchParams : Parsable<SearchParams>
     {
-        public string Username { get; set; } = User.Unspecified;
+        public string Username { get; set; } = Unspecified.User;
         public bool Exact { get; set; } = false;
-        public string Query { get; set; } = "";
+        public string Query { get; set; } = Unspecified.Query;
         public string? Artist { get; set; }
         public string? Title { get; set; }
         public ComparisonFilter? Playcount { get; set; }
@@ -93,6 +94,104 @@ namespace OSPC.Utils.Parsing
             });
         }
 
+        public MySqlCommand GetFilterQueryCommand(int userId, int pageSize, int pageNumber)
+        {
+            MySqlCommand cmd = new();
+            cmd.CommandText = GetFilterQuery(userId, pageSize, pageNumber);
+            return cmd;
+        }
 
+        public MySqlCommand GetFilterResultCountQueryCommand(int userId)
+        {            
+            MySqlCommand cmd = new();
+            cmd.CommandText = GetFilterResultCountQuery(userId);
+            return cmd;
+        }
+
+        private void SetCommandParameters(MySqlCommand command)
+        {            
+            if (IsGeneralQuery())
+                command.Parameters.AddWithValue("@query", Query);
+            else
+            {
+                command.Parameters.AddWithValue("@artist", Artist ?? string.Empty);
+                command.Parameters.AddWithValue("@title", Title ?? string.Empty);
+            }
+        }
+        
+        private string GetFilterQuery(int userId, int pageSize, int pageNumber)
+        {
+            var query =
+                GetQueryPartForSelect(isResultCountQuery: false) + "\n" +
+                GetQueryCommonParts(userId) + "\n" +
+                GetQueryPartForOrderBy(pageSize, pageNumber) + "\n";
+
+            return query;
+        }
+        
+        private string GetFilterResultCountQuery(int userId)
+        {            
+            var query =
+                GetQueryPartForSelect(isResultCountQuery: true) + "\n" +
+                GetQueryCommonParts(userId);
+
+            return query;
+        }
+
+        private string GetQueryCommonParts(int userId)
+        {
+            var query =
+                GetQueryPartForWhereClause(userId) + "\n" +
+                GetQueryPartForCountComparison() + "\n" +
+                GetQueryPartForArtistAndTitle() + "\n" +
+                GetQueryPartForBeatmapFilter() + "\n";
+
+            return query;
+        }
+
+        private string GetQueryPartForSelect(bool isResultCountQuery)
+        {
+            const string fromAndJoinClause = @"FROM BeatmapPlaycounts
+                JOIN Beatmaps ON BeatmapPlaycounts.BeatmapId = Beatmaps.Id 
+                JOIN BeatmapSet ON Beatmaps.BeatmapSetId = BeatmapSet.Id";
+
+            var selectClause = isResultCountQuery ?
+                "SELECT COUNT(BeatmapPlaycounts.Count)":
+                "SELECT BeatmapPlaycounts.*,Beatmaps.Id,Beatmaps.Version,Beatmaps.DifficultyRating,Beatmaps.BeatmapSetId,BeatmapSet.*";
+
+            return
+                selectClause + "\n" +
+                fromAndJoinClause;
+        }
+
+        private string GetQueryPartForWhereClause(int userId)
+            => $"WHERE BeatmapPlaycounts.UserId = {userId}";
+        
+        private string GetQueryPartForCountComparison()
+            => ComparisonConverter.CreateComparisonClause(Playcount!, "BeatmapPlaycounts", "Count");
+            
+        private string GetQueryPartForArtistAndTitle()
+        {
+            bool generalQuery = IsGeneralQuery();
+            string artistConcat = generalQuery ? (Exact && Query != "" ? "" : "%") : (Exact && Artist != "" ? "" : "%");
+            string titleConcat = generalQuery ? (Exact && Query != "" ? "" : "%") : (Exact && Title != "" ? "" : "%");
+            return $@"AND (
+                BeatmapSet.Title LIKE CONCAT('{titleConcat}', {(generalQuery ? "@query" : "@title")}, '{titleConcat}') 
+                {(generalQuery ? "OR" : "AND")} 
+                BeatmapSet.Artist LIKE CONCAT('{artistConcat}', {(generalQuery ? "@query" : "@artist")}, '{artistConcat}')
+            )";
+        }
+
+        private string GetQueryPartForBeatmapFilter()
+            => BeatmapFilter is {} b ? b.GetClause():string.Empty;
+
+        private string GetQueryPartForOrderBy(int pageSize, int pageNumber)
+            => $@"
+                ORDER BY BeatmapPlaycounts.Count DESC
+                LIMIT {pageSize}
+                OFFSET {(pageNumber - 1) * pageSize}
+            ";
+
+        private bool IsGeneralQuery() => Artist is Unspecified.Artist && Title is Unspecified.Title;
     }
 }

@@ -44,7 +44,7 @@ namespace OSPC.Tests.Unit
         [Fact]
         public async Task SearchUsingChannelContextTest()
         {
-            var result = await _userSearch.SearchUser(User.Unspecified, new ChannelOsuContext { DiscordUserId = 1, ChannelId = 1 });
+            var result = await _userSearch.SearchUser(Unspecified.User, new ChannelOsuContext { DiscordUserId = 1, ChannelId = 1 });
 
             _userRepoMock.Verify(u => u.GetUserByUsername(It.IsAny<string>()), Times.Never);
             _userRepoMock.Verify(u => u.GetUserWithDiscordId(It.IsAny<ulong>()), Times.Exactly(1));
@@ -71,7 +71,7 @@ namespace OSPC.Tests.Unit
         {
             _userRepoMock.Setup(u => u.GetUserWithDiscordId(It.IsAny<ulong>())).ReturnsAsync(Result<User>.Fail(Errors.Unspecified("Mock")));
 
-            var result = await _userSearch.SearchUser(User.Unspecified, new ChannelOsuContext { DiscordUserId = 1, ChannelId = 1 });
+            var result = await _userSearch.SearchUser(Unspecified.User, new ChannelOsuContext { DiscordUserId = 1, ChannelId = 1 });
 
             _userRepoMock.Verify(u => u.GetUserByUsername(It.IsAny<string>()), Times.Never);
             _userRepoMock.Verify(u => u.GetUserWithDiscordId(It.IsAny<ulong>()), Times.Exactly(1));
@@ -86,7 +86,7 @@ namespace OSPC.Tests.Unit
             _userRepoMock.Setup(u => u.GetUserByUsername(It.IsAny<string>())).ReturnsAsync(Result<User>.Fail(Errors.Unspecified("Mock")));
             _osuWebClientMock.Setup(o => o.FindUserWithUsername(It.IsAny<string>())).ReturnsAsync((User)null!);
 
-            var result = await _userSearch.SearchUser(User.Unspecified);
+            var result = await _userSearch.SearchUser(Unspecified.User);
 
             _userRepoMock.Verify(u => u.GetUserByUsername(It.IsAny<string>()), Times.Exactly(1));
             _userRepoMock.Verify(u => u.GetUserWithDiscordId(It.IsAny<ulong>()), Times.Never);
