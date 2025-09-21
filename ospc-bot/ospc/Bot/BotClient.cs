@@ -37,6 +37,9 @@ namespace OSPC.Bot
     public class BotClient
     {
         public static BotClient Instance { get; private set; }
+
+        private readonly CommandLineArgs _args;
+
         private DiscordSocketClient _client;
         private CommandService _cmds;
         private InteractionService _interactService;
@@ -53,8 +56,9 @@ namespace OSPC.Bot
         public Dictionary<ulong, int> CurrentPageForEmbed { get; set; } = new();
         public Dictionary<ulong, ButtonType> LastButtonIdClickedForEmbeded { get; set; } = new();
 
-        public BotClient()
+        public BotClient(CommandLineArgs args)
         {
+            _args = args;
             Instance = this;
             SetupApp();
         }
@@ -116,7 +120,12 @@ namespace OSPC.Bot
                     return ConnectionMultiplexer.Connect(cacheOptions.Value.RedisConnection);
                 })
                 .AddSingleton<IOsuWebClient, OsuWebClient>()
-                .AddSingleton<IRedisService, RedisService>()
+                .AddSingleton<IRedisService>(sp =>
+                {
+                    return _args.DisableCaching ?
+                        new DisabledRedisService():
+                        new RedisService(sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<RedisService>>(), sp.GetRequiredService<IOptions<CacheOptions>>(), sp.GetRequiredService<IConnectionMultiplexer>());     
+                })
                 .AddSingleton<IPlaycountFetchJobQueue, PlaycountFetchJobQueue>()
                 .AddScoped<IDatabase, MySqlDatabase>()
                 .AddScoped<IUserRepository, UserRepository>()
