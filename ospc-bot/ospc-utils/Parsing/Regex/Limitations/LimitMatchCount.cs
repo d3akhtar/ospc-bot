@@ -29,7 +29,7 @@ namespace OSPC.Utils.Parsing.RegularExpressions.Limitations
             return succeedingGroups.Count <= MaxMatchCount;
         }
 
-        public string ErrorMessage() => $"Number of matches for \'{GroupName}\' exceeded the maximum amount: {MaxMatchCount}";
+        public string ErrorMessage => $"Number of matches for \'{GroupName}\' exceeded the maximum amount: {MaxMatchCount}";
 
         public static LimitMatchCount Create(string groupName, int limit)
             => new()

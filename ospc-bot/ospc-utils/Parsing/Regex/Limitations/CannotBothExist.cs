@@ -18,7 +18,7 @@ namespace OSPC.Utils.Parsing.RegularExpressions.Limitations
 
         public bool Passes(MatchCollection _) => false;
 
-        public string ErrorMessage() => $"A match for both groups \'{GroupName}\' and \'{OtherGroup}\' isn't allowed";
+        public string ErrorMessage => $"A match for both groups \'{GroupName}\' and \'{OtherGroup}\' isn't allowed";
 
         public static CannotBothExist Create(string groupName, string otherGroup)
             => new()
