@@ -1,7 +1,6 @@
 using MySql.Data.MySqlClient;
-
+using OSPC.Domain.Common;
 using OSPC.Domain.Model;
-using OSPC.Utils;
 using OSPC.Utils.Parsing;
 
 namespace OSPC.Infrastructure.Database.CommandFactory

@@ -1,17 +1,15 @@
-using Discord;
 using Discord.Commands;
 
 using Microsoft.Extensions.Logging;
 
-using OSPC.Bot.Command;
 using OSPC.Bot.Component;
-using OSPC.Bot.Context;
-using OSPC.Domain.Model;
+using OSPC.Bot.Extensions;
+using OSPC.Bot.Service;
+using OSPC.Domain.Common;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
 using OSPC.Utils;
 using OSPC.Utils.Parsing;
-using OSPC.Utils.Parsing.RegularExpressions.Results;
 
 namespace OSPC.Bot.Module.Info
 {
@@ -75,7 +73,7 @@ namespace OSPC.Bot.Module.Info
         }
 
         private async Task PageForEmbedUpdated(ulong id)
-            => await Embeded.PageForEmbedUpdated(_osuWebClient, _beatmapRepo, id);
+            => await EmbededUtils.PageForEmbedUpdated(_osuWebClient, _beatmapRepo, id);
 
         [Command("most-played")]
         public async Task MostPlayed(string username = Unspecified.User)

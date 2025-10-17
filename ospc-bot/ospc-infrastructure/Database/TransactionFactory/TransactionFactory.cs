@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 
 using OSPC.Domain.Model;
-using OSPC.Utils;
+using OSPC.Domain.Common;
 
 namespace OSPC.Infrastructure.Database.TransactionFactory
 {

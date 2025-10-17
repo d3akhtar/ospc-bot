@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Serilog;
 
-namespace OSPC.Bot.MessageHandlers
+namespace OSPC.Bot.Messaging.Handlers
 {
     public class InteractionHandler
     {

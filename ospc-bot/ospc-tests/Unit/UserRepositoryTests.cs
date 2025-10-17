@@ -5,7 +5,6 @@ using Moq;
 using MySql.Data.MySqlClient;
 
 using OSPC.Domain.Model;
-using OSPC.Infrastructure.Database;
 using OSPC.Infrastructure.Database.CommandFactory;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Tests.DefaultValueProviders;

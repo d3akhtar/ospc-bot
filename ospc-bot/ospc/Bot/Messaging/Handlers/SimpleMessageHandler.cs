@@ -8,7 +8,7 @@ using OSPC.Utils;
 
 using Serilog;
 
-namespace OSPC.Bot.MessageHandlers
+namespace OSPC.Bot.Messaging.Handlers
 {
     public class SimpleMessageHandler
     {

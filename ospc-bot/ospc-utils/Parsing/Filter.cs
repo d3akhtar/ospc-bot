@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
 
 namespace OSPC.Utils

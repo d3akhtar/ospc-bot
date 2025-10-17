@@ -2,9 +2,10 @@ using Discord.Commands;
 
 using Microsoft.Extensions.Logging;
 
-using OSPC.Bot.Command;
+using OSPC.Bot.Service;
 using OSPC.Bot.Component;
 using OSPC.Utils;
+using OSPC.Bot.Extensions;
 
 namespace OSPC.Bot.Module.Info
 {
@@ -31,9 +32,9 @@ namespace OSPC.Bot.Module.Info
         public async Task Help(string command = Unspecified.BotCommand)
         {
             if (command is Unspecified.BotCommand)
-                await ReplyAsync(embed: Embeded.BuildHelpEmbed());
+                await ReplyAsync(embed: EmbededUtils.BuildHelpEmbed());
             else
-                await ReplyAsync(embed: Embeded.BuildHelpEmbedForCommand(command));
+                await ReplyAsync(embed: EmbededUtils.BuildHelpEmbedForCommand(command));
         }
     }
 }

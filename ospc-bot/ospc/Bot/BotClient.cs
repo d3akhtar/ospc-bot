@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Text.Json;
 
 using Discord;
 using Discord.Commands;
@@ -7,44 +6,26 @@ using Discord.Interactions;
 using Discord.Net;
 using Discord.WebSocket;
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using OSPC.Bot.Command;
-using OSPC.Bot.Component;
 using OSPC.Bot.Logging;
-using OSPC.Bot.MessageHandlers;
-using OSPC.Bot.Search.UserSearch;
+using OSPC.Bot.Messaging.Handlers;
+using OSPC.Bot.Enums;
 using OSPC.Domain.Options;
-using OSPC.Infrastructure.Caching;
-using OSPC.Infrastructure.Database;
-using OSPC.Infrastructure.Database.CommandFactory;
-using OSPC.Infrastructure.Database.Repository;
-using OSPC.Infrastructure.Database.TransactionFactory;
-using OSPC.Infrastructure.Http;
-using OSPC.Infrastructure.Job;
-using OSPC.Utils;
 
 using Serilog;
-
-using StackExchange.Redis;
-
-using IDatabase = OSPC.Infrastructure.Database.IDatabase;
 
 namespace OSPC.Bot
 {
     public class BotClient
     {
         public static BotClient Instance { get; private set; }
-
-        private readonly CommandLineArgs _args;
-
+        
         private DiscordSocketClient _client;
         private CommandService _cmds;
         private InteractionService _interactService;
         private IServiceProvider _serviceProvider;
-        private IConfigurationRoot _config;
 
         private SimpleMessageHandler _simpleMessageHandler;
         private InteractionHandler _interactionHandler;
@@ -56,11 +37,11 @@ namespace OSPC.Bot
         public Dictionary<ulong, int> CurrentPageForEmbed { get; set; } = new();
         public Dictionary<ulong, ButtonType> LastButtonIdClickedForEmbeded { get; set; } = new();
 
-        public BotClient(CommandLineArgs args)
+        public BotClient(IServiceCollection serviceCollection)
         {
-            _args = args;
             Instance = this;
-            SetupApp();
+            _serviceProvider = serviceCollection.BuildServiceProvider();
+            SetupClient();
         }
 
         public async Task StartAsync()
@@ -76,67 +57,6 @@ namespace OSPC.Bot
 
                 await Task.Delay(-1); // Block               
             }
-        }
-
-        private void SetupApp()
-        {
-            SetupConfiguration();
-            SetupLogging();
-            SetupServiceProvider();
-            SetupClient();
-        }
-
-        private void SetupLogging()
-        {
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(_config)
-                .CreateLogger();
-        }
-
-        private void SetupConfiguration()
-        {
-            _config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
-        }
-
-        private void SetupServiceProvider()
-        {
-            var serviceCollection = new ServiceCollection();
-
-            serviceCollection.AddLogging(builder =>
-            {
-                builder.AddSerilog();
-            });
-
-            serviceCollection
-                .AddAppOption<DatabaseOptions>(_config)
-                .AddAppOption<DiscordOptions>(_config)
-                .AddAppOption<OsuWebApiOptions>(_config)
-                .AddAppOption<CacheOptions>(_config)
-                .AddScoped<IConnectionMultiplexer, ConnectionMultiplexer>(sp =>
-                {
-                    var cacheOptions = sp.GetRequiredService<IOptions<CacheOptions>>();
-                    return ConnectionMultiplexer.Connect(cacheOptions.Value.RedisConnection);
-                })
-                .AddSingleton<IOsuWebClient, OsuWebClient>()
-                .AddSingleton<IRedisService>(sp =>
-                {
-                    return _args.DisableCaching ?
-                        new DisabledRedisService():
-                        new RedisService(sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<RedisService>>(), sp.GetRequiredService<IOptions<CacheOptions>>(), sp.GetRequiredService<IConnectionMultiplexer>());     
-                })
-                .AddSingleton<IPlaycountFetchJobQueue, PlaycountFetchJobQueue>()
-                .AddScoped<IDatabase, MySqlDatabase>()
-                .AddScoped<IUserRepository, UserRepository>()
-                .AddScoped<IBeatmapRepository, BeatmapRepository>()
-                .AddScoped<IOsuWebClient, OsuWebClient>()
-                .AddScoped<IUserSearch, UserSearch>()
-                .AddScoped<IBotCommandService, BotCommandService>()
-                .AddSingleton<ICommandFactory, CommandFactory>()
-                .AddSingleton<ITransactionFactory, TransactionFactory>();
-
-            _serviceProvider = serviceCollection.BuildServiceProvider();
         }
 
         private void SetupClient()

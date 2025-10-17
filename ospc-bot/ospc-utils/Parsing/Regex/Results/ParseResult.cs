@@ -1,3 +1,5 @@
+using OSPC.Domain.Common;
+
 namespace OSPC.Utils.Parsing.RegularExpressions.Results
 {
     public record ParseResult : Result

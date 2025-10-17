@@ -1,7 +1,7 @@
 using MySql.Data.MySqlClient;
 
 using OSPC.Infrastructure.Database;
-using OSPC.Utils;
+using OSPC.Domain.Common;
 
 namespace OSPC.Tests.Mocks
 {

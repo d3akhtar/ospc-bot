@@ -4,9 +4,9 @@ using Microsoft.Extensions.Logging;
 
 using OSPC.Bot.Command.Result;
 using OSPC.Bot.Component;
-using OSPC.Utils;
+using OSPC.Domain.Common;
 
-using SearchResult = OSPC.Bot.Command.Result.SearchResult;
+using PagedReply = OSPC.Bot.Command.Result.PagedReply;
 
 namespace OSPC.Bot.Module.Info
 {
@@ -15,9 +15,9 @@ namespace OSPC.Bot.Module.Info
 #pragma warning disable CS8625
         protected ILogger _logger = default;
 
-        public async Task ReplyBotCommandResultAsync(CommandResult result)
+        public async Task ReplyBotCommandResultAsync(Reply result)
         {
-            if (result is SearchResult searchResult)
+            if (result is PagedReply searchResult)
                 await ReplySearchResultAsync(searchResult);
             else
                 await ReplyCommandResultAsync(result);
@@ -26,16 +26,16 @@ namespace OSPC.Bot.Module.Info
         public async Task ReplyErrorAsync(Error error)
         {
             _logger.LogInformation("Replying to user with error: {@Error}", error);
-            await ReplyAsync(embed: Embeded.BuildErrorEmbed(error));
+            await ReplyAsync(embed: EmbededUtils.BuildErrorEmbed(error));
         }
 
-        private async Task ReplyCommandResultAsync(CommandResult result)
+        private async Task ReplyCommandResultAsync(Reply result)
         {
             _logger.LogDebug("Responding with command result: {CommandResult}", result);
             await ReplyAsync(embed: result.Embed);
         }
 
-        private async Task ReplySearchResultAsync(SearchResult result)
+        private async Task ReplySearchResultAsync(PagedReply result)
         {
             _logger.LogDebug("Responding with search result: {SearchResult}", result);
 
@@ -50,7 +50,7 @@ namespace OSPC.Bot.Module.Info
                 components: result.Components
             );
 
-            Embeded.CreatePlaycountListEmbed(result.Context);
+            EmbededUtils.CreatePlaycountListEmbed(result.Context);
         }
     }
 }

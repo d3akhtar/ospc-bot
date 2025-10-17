@@ -2,10 +2,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using MySql.Data.MySqlClient;
-
+using OSPC.Domain.Common;
 using OSPC.Domain.Options;
 using OSPC.Infrastructure.Caching;
-using OSPC.Utils;
 
 namespace OSPC.Infrastructure.Database
 {

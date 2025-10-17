@@ -2,10 +2,11 @@ using Discord;
 using Discord.WebSocket;
 
 using OSPC.Bot.Component;
+using OSPC.Bot.Enums;
 
 using Serilog;
 
-namespace OSPC.Bot.MessageHandlers
+namespace OSPC.Bot.Messaging.Handlers
 {
     // TODO: REMEMBER TO AT LEAST THINK OF A **CLEANER** WAY TO IMPLEMENT THIS LOGIC PLZZ
     public class PagedMessageHandler
@@ -24,9 +25,9 @@ namespace OSPC.Bot.MessageHandlers
                         await modal.DeferAsync();
                         BotClient.Instance.CurrentPageForEmbed[msgId] = int.Parse(modal.Data.Components.First(x => x.CustomId == "page_number").Value);
                         BotClient.Instance.LastButtonIdClickedForEmbeded[msgId] = ButtonType.NextPage;
-                        Embeded.PauseTimer(modal.Message);
+                        EmbededUtils.PauseTimer(modal.Message);
                         await BotClient.Instance.InvokePageForEmbedUpdatedEvent(msgId);
-                        Embeded.ResetTimer(modal.Message);
+                        EmbededUtils.ResetTimer(modal.Message);
                         break;
                     }
                     default:
@@ -76,7 +77,7 @@ namespace OSPC.Bot.MessageHandlers
                         break;
                     case "last_page":
                         await component.DeferAsync();
-                        BotClient.Instance.CurrentPageForEmbed[msgId] = Embeded.ActiveEmbeds[msgId].TotalPages;
+                        BotClient.Instance.CurrentPageForEmbed[msgId] = EmbededUtils.ActiveEmbeds[msgId].TotalPages;
                         BotClient.Instance.LastButtonIdClickedForEmbeded[msgId] = ButtonType.LastPage;
                         break;
                     case "choose_page":
@@ -97,9 +98,9 @@ namespace OSPC.Bot.MessageHandlers
                         BotClient.Instance.LastButtonIdClickedForEmbeded[msgId] = ButtonType.PreviousPage;
                         break;
                 }
-                Embeded.PauseTimer(component.Message);
+                EmbededUtils.PauseTimer(component.Message);
                 await BotClient.Instance.InvokePageForEmbedUpdatedEvent(msgId);
-                Embeded.ResetTimer(component.Message);
+                EmbededUtils.ResetTimer(component.Message);
             }
             catch (TimeoutException e)
             {

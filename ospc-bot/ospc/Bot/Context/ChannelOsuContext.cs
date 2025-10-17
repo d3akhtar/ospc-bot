@@ -1,4 +1,4 @@
-namespace OSPC.Utils
+namespace OSPC.Bot.Context
 {
     public class ChannelOsuContext
     {

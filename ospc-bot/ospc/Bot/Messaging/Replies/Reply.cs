@@ -2,26 +2,26 @@
 using Discord;
 
 using OSPC.Bot.Component;
-using OSPC.Utils;
+using OSPC.Domain.Common;
 
 namespace OSPC.Bot.Command.Result
 {
-    public class CommandResult
+    public class Reply
     {
         public required Embed Embed { get; set; }
         public bool Successful { get; set; }
 
-        public static CommandResult Error(string message)
+        public static Reply Error(string message)
             => new()
             {
-                Embed = Embeded.BuildErrorEmbed(message),
+                Embed = EmbededUtils.BuildErrorEmbed(message),
                 Successful = false
             };
 
-        public static CommandResult Error(Error error)
+        public static Reply Error(Error error)
             => Error(error.Message!);
 
-        public static CommandResult Success(Embed embed)
+        public static Reply Success(Embed embed)
             => new()
             {
                 Embed = embed,

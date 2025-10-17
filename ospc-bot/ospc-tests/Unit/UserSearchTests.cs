@@ -1,22 +1,23 @@
 using Microsoft.Extensions.Logging;
 
 using Moq;
-
-using OSPC.Bot.Search.UserSearch;
+using OSPC.Bot.Context;
+using OSPC.Bot.Service;
 using OSPC.Domain.Model;
+using OSPC.Domain.Common;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
 using OSPC.Utils;
 
 namespace OSPC.Tests.Unit
 {
-    public class UserSearchTests
+    public class UserSearchServiceTests
     {
         private readonly Mock<IUserRepository> _userRepoMock;
         private readonly Mock<IOsuWebClient> _osuWebClientMock;
-        private readonly UserSearch _userSearch;
+        private readonly UserSearchService _userSearch;
 
-        public UserSearchTests()
+        public UserSearchServiceTests()
         {
             var mockUser = new User { Id = 1, Username = "opensand", CountryCode = "CA" };
 
@@ -27,7 +28,7 @@ namespace OSPC.Tests.Unit
             _osuWebClientMock = new();
             _osuWebClientMock.Setup(o => o.FindUserWithUsername(It.IsAny<string>())).ReturnsAsync(mockUser);
 
-            _userSearch = new(Mock.Of<ILogger<UserSearch>>(), _userRepoMock.Object, _osuWebClientMock.Object);
+            _userSearch = new(Mock.Of<ILogger<UserSearchService>>(), _userRepoMock.Object, _osuWebClientMock.Object);
         }
 
         [Fact]

@@ -2,23 +2,23 @@ using Discord;
 
 using OSPC.Bot.Component;
 using OSPC.Bot.Context;
-using OSPC.Utils;
+using OSPC.Domain.Common;
 
 namespace OSPC.Bot.Command.Result
 {
-    public class SearchResult : CommandResult
+    public class PagedReply : Reply
     {
         public MessageComponent? Components { get; set; }
         public PlaycountEmbedContext? Context { get; set; }
 
-        public new static SearchResult Error(string message)
+        public new static PagedReply Error(string message)
             => new()
             {
-                Embed = Embeded.BuildErrorEmbed(message),
+                Embed = EmbededUtils.BuildErrorEmbed(message),
                 Successful = false
             };
 
-        public new static SearchResult Error(Error error)
+        public new static PagedReply Error(Error error)
             => Error(error.Message!);
     }
 }

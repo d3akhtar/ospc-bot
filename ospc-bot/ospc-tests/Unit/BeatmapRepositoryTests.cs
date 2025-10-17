@@ -5,14 +5,12 @@ using Moq;
 using MySql.Data.MySqlClient;
 
 using OSPC.Domain.Model;
-using OSPC.Infrastructure.Database;
 using OSPC.Infrastructure.Database.CommandFactory;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Database.TransactionFactory;
 using OSPC.Tests.DefaultValueProviders;
 using OSPC.Tests.Extensions;
 using OSPC.Tests.Mocks;
-using OSPC.Utils;
 using OSPC.Utils.Parsing;
 
 namespace OSPC.Tests.Unit

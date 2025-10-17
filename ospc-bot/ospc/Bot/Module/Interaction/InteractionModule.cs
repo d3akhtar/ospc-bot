@@ -1,13 +1,12 @@
-using Discord.Commands;
 using Discord.Interactions;
 
 using Microsoft.Extensions.Logging;
 
 using OSPC.Bot.Command.Result;
 using OSPC.Bot.Component;
-using OSPC.Utils;
+using OSPC.Domain.Common;
 
-using SearchResult = OSPC.Bot.Command.Result.SearchResult;
+using PagedReply = OSPC.Bot.Command.Result.PagedReply;
 
 namespace OSPC.Bot.Module.Interaction
 {
@@ -16,24 +15,24 @@ namespace OSPC.Bot.Module.Interaction
 #pragma warning disable CS8625
         protected ILogger _logger = default;
 
-        public async Task RespondBotCommandResultAsync(CommandResult result)
+        public async Task RespondBotCommandResultAsync(Reply result)
         {
-            if (result is SearchResult searchResult)
+            if (result is PagedReply searchResult)
                 await RespondSearchResultAsync(searchResult);
             else
                 await RespondCommandResultAsync(result);
         }
 
         public async Task RespondErrorAsync(Error error)
-            => await RespondAsync(embed: Embeded.BuildErrorEmbed(error));
+            => await RespondAsync(embed: EmbededUtils.BuildErrorEmbed(error));
 
-        private async Task RespondCommandResultAsync(CommandResult result)
+        private async Task RespondCommandResultAsync(Reply result)
         {
             _logger.LogInformation("Responding with command result: {@CommandResult}", result);
             await RespondAsync(embed: result.Embed);
         }
 
-        private async Task RespondSearchResultAsync(SearchResult result)
+        private async Task RespondSearchResultAsync(PagedReply result)
         {
             _logger.LogInformation("Responding with search result: {@SearchResult}", result);
 
@@ -50,7 +49,7 @@ namespace OSPC.Bot.Module.Interaction
                 components: result.Components
             );
 
-            Embeded.CreatePlaycountListEmbed(result.Context);
+            EmbededUtils.CreatePlaycountListEmbed(result.Context);
 
             await DeleteOriginalResponseAsync();
         }
