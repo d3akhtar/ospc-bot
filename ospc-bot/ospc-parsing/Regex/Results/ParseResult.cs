@@ -1,6 +1,6 @@
 using OSPC.Domain.Common;
 
-namespace OSPC.Utils.Parsing.Regex.Results
+namespace OSPC.Parsing.Regex.Results
 {
     public record ParseResult : Result
     {

@@ -8,10 +8,10 @@ using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.CommandFactory;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Database.TransactionFactory;
+using OSPC.Parsing.ParsedObjects;
 using OSPC.Tests.DefaultValueProviders;
 using OSPC.Tests.Extensions;
 using OSPC.Tests.Mocks;
-using OSPC.Utils.Parsing;
 
 namespace OSPC.Tests.Unit
 {

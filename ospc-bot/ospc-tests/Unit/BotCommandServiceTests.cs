@@ -12,7 +12,7 @@ using OSPC.Tests.Extensions;
 using Xunit.Abstractions;
 
 using ChannelOsuContext = OSPC.Bot.Context.ChannelOsuContext;
-using SearchParams = OSPC.Utils.Parsing.SearchParams;
+using SearchParams = OSPC.Parsing.ParsedObjects.SearchParams;
 
 namespace OSPC.Tests.Unit
 {

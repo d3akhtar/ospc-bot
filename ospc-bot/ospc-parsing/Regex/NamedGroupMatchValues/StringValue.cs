@@ -1,4 +1,4 @@
-namespace OSPC.Utils.Parsing.Regex.NamedGroupMatchValues
+namespace OSPC.Parsing.Regex.NamedGroupMatchValues
 {
     public record StringValue : NamedGroupMatchValue
     {

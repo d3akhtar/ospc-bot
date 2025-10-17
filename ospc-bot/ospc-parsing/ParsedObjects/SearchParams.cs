@@ -1,10 +1,13 @@
 using MySql.Data.MySqlClient;
-using OSPC.Utils.Parsing.Regex;
-using OSPC.Utils.Parsing.Regex.Limitations;
-using OSPC.Utils.Parsing.Regex.NamedGroupMatchValues;
-using OSPC.Utils.Parsing.Regex.Results;
+using OSPC.Domain.Constants;
+using OSPC.Parsing.Converters;
+using OSPC.Parsing.Filters;
+using OSPC.Parsing.Regex;
+using OSPC.Parsing.Regex.Limitations;
+using OSPC.Parsing.Regex.NamedGroupMatchValues;
+using OSPC.Parsing.Regex.Results;
 
-namespace OSPC.Utils.Parsing
+namespace OSPC.Parsing.ParsedObjects
 {
     public class SearchParams : Parsable<SearchParams>
     {

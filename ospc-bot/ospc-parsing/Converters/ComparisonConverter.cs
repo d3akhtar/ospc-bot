@@ -1,4 +1,6 @@
-namespace OSPC.Utils
+using OSPC.Parsing.Filters;
+
+namespace OSPC.Parsing.Converters
 {
     public enum Comparison
     {

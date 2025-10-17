@@ -1,4 +1,4 @@
-namespace OSPC.Utils
+namespace OSPC.Domain.Constants
 {
 	public static class Unspecified
 	{

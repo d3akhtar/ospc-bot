@@ -1,6 +1,6 @@
 using OSPC.Domain.Common;
 using OSPC.Domain.Model;
-using OSPC.Utils.Parsing;
+using OSPC.Parsing.ParsedObjects;
 
 namespace OSPC.Infrastructure.Database.Repository
 {

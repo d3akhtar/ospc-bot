@@ -1,11 +1,11 @@
 using System.Linq.Expressions;
 using OSPC.Domain.Common;
+using OSPC.Parsing.Regex;
+using OSPC.Parsing.Regex.NamedGroupMatchValues;
+using OSPC.Parsing.Regex.Results;
 using OSPC.Utils.Helpers;
-using OSPC.Utils.Parsing.Regex;
-using OSPC.Utils.Parsing.Regex.NamedGroupMatchValues;
-using OSPC.Utils.Parsing.Regex.Results;
 
-namespace OSPC.Utils.Parsing
+namespace OSPC.Parsing.ParsedObjects
 {
     public class Parsable<T> where T : class, new()
     {

@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using OSPC.Bot.Context;
 using OSPC.Domain.Common;
+using OSPC.Domain.Constants;
 using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
-using OSPC.Utils;
 
 namespace OSPC.Bot.Service
 {

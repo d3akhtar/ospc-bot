@@ -7,7 +7,7 @@ using OSPC.Domain.Model;
 using OSPC.Domain.Common;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
-using OSPC.Utils;
+using OSPC.Domain.Constants;
 
 namespace OSPC.Tests.Unit
 {

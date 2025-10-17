@@ -1,6 +1,6 @@
 using OSPC.Bot.Command.Result;
 using OSPC.Bot.Context;
-using OSPC.Utils.Parsing;
+using OSPC.Parsing.ParsedObjects;
 
 namespace OSPC.Bot.Service
 {

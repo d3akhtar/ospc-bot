@@ -21,6 +21,7 @@
     <ProjectReference Include="..\ospc-infrastructure\ospc-infrastructure.csproj" />
     <ProjectReference Include="..\ospc-domain\ospc-domain.csproj" />
     <ProjectReference Include="..\ospc-utils\ospc-utils.csproj" />
+    <ProjectReference Include="..\ospc-parsing\ospc-parsing.csproj" />
   </ItemGroup>
 
   <ItemGroup>
