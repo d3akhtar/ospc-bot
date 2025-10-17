@@ -55,69 +55,69 @@
   ],
   "BeatmapFilterSinglePropertyParseTest":
   [
-    [ "cs<3", { "CircleSize": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "cs<=3", { "CircleSize": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "cs=3", { "CircleSize": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "cs>=3", { "CircleSize": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "cs>3", { "CircleSize": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "bpm<3", { "BPM": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "bpm<=3", { "BPM": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "bpm=3", { "BPM": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "bpm>=3", { "BPM": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "bpm>3", { "BPM": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "length<3", { "Length": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "length<=3", { "Length": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "length=3", { "Length": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "length>=3", { "Length": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "length>3", { "Length": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "drain<3", { "HpDrain": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "drain<=3", { "HpDrain": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "drain=3", { "HpDrain": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "drain>=3", { "HpDrain": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "drain>3", { "HpDrain": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "od<3", { "OD": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "od<=3", { "OD": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "od=3", { "OD": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "od>=3", { "OD": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "od>3", { "OD": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "ar<3", { "AR": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "ar<=3", { "AR": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "ar=3", { "AR": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "ar>=3", { "AR": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "ar>3", { "AR": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "sr<3", { "DifficultyRating": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "sr<=3", { "DifficultyRating": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "sr=3", { "DifficultyRating": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "sr>=3", { "DifficultyRating": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "sr>3", { "DifficultyRating": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Utils.SingleFilter, ospc-utils" }}],
-    [ "cs>3 cs<4", { "CircleSize": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "cs>=3 cs<=4", { "CircleSize": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "cs>3 cs<=4", { "CircleSize": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "cs>=3 cs<4", { "CircleSize": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "bpm>3 bpm<4", { "BPM": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "bpm>=3 bpm<=4", { "BPM": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "bpm>3 bpm<=4", { "BPM": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "bpm>=3 bpm<4", { "BPM": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "length>3 length<4", { "Length": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "length>=3 length<=4", { "Length": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "length>3 length<=4", { "Length": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "length>=3 length<4", { "Length": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "drain>3 drain<4", { "HpDrain": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "drain>=3 drain<=4", { "HpDrain": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "drain>3 drain<=4", { "HpDrain": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "drain>=3 drain<4", { "HpDrain": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "od>3 od<4", { "OD": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "od>=3 od<=4", { "OD": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "od>3 od<=4", { "OD": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "od>=3 od<4", { "OD": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "ar>3 ar<4", { "AR": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "ar>=3 ar<=4", { "AR": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "ar>3 ar<=4", { "AR": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "ar>=3 ar<4", { "AR": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "sr>3 sr<4", { "DifficultyRating": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "sr>=3 sr<=4", { "DifficultyRating": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "sr>3 sr<=4", { "DifficultyRating": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
-    [ "sr>=3 sr<4", { "DifficultyRating": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Utils.BetweenFilter, ospc-utils" }}}],
+    [ "cs<3", { "CircleSize": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "cs<=3", { "CircleSize": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "cs=3", { "CircleSize": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "cs>=3", { "CircleSize": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "cs>3", { "CircleSize": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "bpm<3", { "BPM": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "bpm<=3", { "BPM": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "bpm=3", { "BPM": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "bpm>=3", { "BPM": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "bpm>3", { "BPM": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "length<3", { "Length": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "length<=3", { "Length": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "length=3", { "Length": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "length>=3", { "Length": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "length>3", { "Length": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "drain<3", { "HpDrain": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "drain<=3", { "HpDrain": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "drain=3", { "HpDrain": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "drain>=3", { "HpDrain": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "drain>3", { "HpDrain": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "od<3", { "OD": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "od<=3", { "OD": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "od=3", { "OD": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "od>=3", { "OD": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "od>3", { "OD": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "ar<3", { "AR": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "ar<=3", { "AR": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "ar=3", { "AR": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "ar>=3", { "AR": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "ar>3", { "AR": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "sr<3", { "DifficultyRating": { "Value": 3, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "sr<=3", { "DifficultyRating": { "Value": 3, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "sr=3", { "DifficultyRating": { "Value": 3, "Comparison": "Equal", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "sr>=3", { "DifficultyRating": { "Value": 3, "Comparison": "GreaterOrEqual", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "sr>3", { "DifficultyRating": { "Value": 3, "Comparison": "Greater", "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing" }}],
+    [ "cs>3 cs<4", { "CircleSize": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "cs>=3 cs<=4", { "CircleSize": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "cs>3 cs<=4", { "CircleSize": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "cs>=3 cs<4", { "CircleSize": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "bpm>3 bpm<4", { "BPM": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "bpm>=3 bpm<=4", { "BPM": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "bpm>3 bpm<=4", { "BPM": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "bpm>=3 bpm<4", { "BPM": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "length>3 length<4", { "Length": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "length>=3 length<=4", { "Length": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "length>3 length<=4", { "Length": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "length>=3 length<4", { "Length": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "drain>3 drain<4", { "HpDrain": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "drain>=3 drain<=4", { "HpDrain": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "drain>3 drain<=4", { "HpDrain": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "drain>=3 drain<4", { "HpDrain": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "od>3 od<4", { "OD": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "od>=3 od<=4", { "OD": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "od>3 od<=4", { "OD": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "od>=3 od<4", { "OD": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "ar>3 ar<4", { "AR": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "ar>=3 ar<=4", { "AR": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "ar>3 ar<=4", { "AR": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "ar>=3 ar<4", { "AR": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "sr>3 sr<4", { "DifficultyRating": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "sr>=3 sr<=4", { "DifficultyRating": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "sr>3 sr<=4", { "DifficultyRating": { "Min": { "Value": 3, "Comparison": "Greater" }, "Max": { "Value": 4, "Comparison": "LessOrEqual", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
+    [ "sr>=3 sr<4", { "DifficultyRating": { "Min": { "Value": 3, "Comparison": "GreaterOrEqual" }, "Max": { "Value": 4, "Comparison": "Less", "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing" }}}],
   ],
   "SearchParamsParseComplexInputTest":
   [
@@ -146,7 +146,7 @@
         "Exact": "True",
         "Playcount":
         {
-          "$type": "OSPC.Utils.BetweenFilter, ospc-utils",
+          "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing",
           "Min": { "Value": 10, "Comparison": "Greater" },
           "Max": {"Value": 30, "Comparison": "LessOrEqual"}
         },
@@ -154,7 +154,7 @@
         {
           "CircleSize":
           {
-            "$type": "OSPC.Utils.SingleFilter, ospc-utils",
+            "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing",
             "Value": 3.6,
             "Comparison": "LessOrEqual"
           }
@@ -168,7 +168,7 @@
         "Username": "Some random username",
         "Playcount":
         {
-          "$type": "OSPC.Utils.SingleFilter, ospc-utils",
+          "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing",
           "Value": 100,
           "Comparison": "GreaterOrEqual"
         },
@@ -176,19 +176,19 @@
         {
           "BPM":
           {
-            "$type": "OSPC.Utils.BetweenFilter, ospc-utils",
+            "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing",
             "Min": { "Value": 100, "Comparison": "GreaterOrEqual" },
             "Max": {"Value": 200, "Comparison": "LessOrEqual"}
           },
           "CircleSize":
           {
-            "$type": "OSPC.Utils.BetweenFilter, ospc-utils",
+            "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing",
             "Min": { "Value": 4, "Comparison": "GreaterOrEqual" },
             "Max": {"Value": 5.5, "Comparison": "LessOrEqual"}
           },
           "DifficultyRating":
           {
-            "$type": "OSPC.Utils.SingleFilter, ospc-utils",
+            "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing",
             "Value": 6.28,
             "Comparison": "Greater"
           }
@@ -206,37 +206,37 @@
         {
           "BPM":
           {
-            "$type": "OSPC.Utils.BetweenFilter, ospc-utils",
+            "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing",
             "Min": { "Value": 180, "Comparison": "GreaterOrEqual" },
             "Max": {"Value": 190, "Comparison": "LessOrEqual"}
           },
           "Length":
           {
-            "$type": "OSPC.Utils.SingleFilter, ospc-utils",
+            "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing",
             "Value": 120,
             "Comparison": "GreaterOrEqual"
           },
           "DifficultyRating":
           {
-            "$type": "OSPC.Utils.SingleFilter, ospc-utils",
+            "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing",
             "Value": 6.1,
             "Comparison": "GreaterOrEqual"
           },
           "CircleSize":
           {
-            "$type": "OSPC.Utils.BetweenFilter, ospc-utils",
+            "$type": "OSPC.Parsing.Filters.BetweenFilter, ospc-parsing",
             "Min": { "Value": 3.8, "Comparison": "GreaterOrEqual" },
             "Max": {"Value": 4.2, "Comparison": "LessOrEqual"}
           },
           "AR":
           {
-            "$type": "OSPC.Utils.SingleFilter, ospc-utils",
+            "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing",
             "Value": 9.3,
             "Comparison": "Equal"
           },
           "OD":
           {
-            "$type": "OSPC.Utils.SingleFilter, ospc-utils",
+            "$type": "OSPC.Parsing.Filters.SingleFilter, ospc-parsing",
             "Value": 8.5,
             "Comparison": "GreaterOrEqual"
           },

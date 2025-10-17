@@ -1,9 +1,10 @@
 using System.Linq.Expressions;
+using OSPC.Parsing.Converters;
+using OSPC.Parsing.Filters;
+using OSPC.Parsing.Regex.Limitations;
+using OSPC.Parsing.Regex.NamedGroupMatchValues;
 
-using OSPC.Utils.Parsing.Regex.Limitations;
-using OSPC.Utils.Parsing.Regex.NamedGroupMatchValues;
-
-namespace OSPC.Utils.Parsing
+namespace OSPC.Parsing.ParsedObjects
 {
     public class BeatmapFilter : Parsable<BeatmapFilter>
     {

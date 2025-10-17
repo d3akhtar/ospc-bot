@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 
 using OSPC.Bot.Service;
 using OSPC.Bot.Component;
-using OSPC.Utils;
 using OSPC.Bot.Extensions;
+using OSPC.Domain.Constants;
 
 namespace OSPC.Bot.Module.Info
 {

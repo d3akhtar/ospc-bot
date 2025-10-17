@@ -1,4 +1,4 @@
-namespace OSPC.Utils.Parsing.Regex
+namespace OSPC.Parsing.Regex
 {
     public static class RegexFlagMatchOptionsExtensions
     {

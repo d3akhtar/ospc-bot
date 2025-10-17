@@ -1,10 +1,9 @@
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-
+using OSPC.Parsing.Regex.Interfaces;
 using OSPC.Utils.Helpers;
-using OSPC.Utils.Parsing.Regex.Interfaces;
 
-namespace OSPC.Utils.Parsing.Regex.Limitations
+namespace OSPC.Parsing.Regex.Limitations
 {
     public class CannotBothExist : IRegexGroupLimitation
     {

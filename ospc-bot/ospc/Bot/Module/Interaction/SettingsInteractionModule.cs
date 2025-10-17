@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using OSPC.Bot.Component;
 using OSPC.Bot.Extensions;
 using OSPC.Bot.Service;
-using OSPC.Utils;
+using OSPC.Domain.Constants;
 
 namespace OSPC.Bot.Module.Interaction
 {

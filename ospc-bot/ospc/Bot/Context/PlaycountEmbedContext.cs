@@ -1,7 +1,7 @@
 using Discord;
 
 using OSPC.Domain.Model;
-using OSPC.Utils.Parsing;
+using OSPC.Parsing.ParsedObjects;
 
 namespace OSPC.Bot.Context
 {

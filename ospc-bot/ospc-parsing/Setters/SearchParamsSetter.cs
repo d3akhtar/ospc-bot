@@ -1,4 +1,4 @@
-namespace OSPC.Utils
+namespace OSPC.Parsing
 {
     public interface ISetter<T>
     {

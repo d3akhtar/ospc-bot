@@ -1,8 +1,7 @@
+using OSPC.Parsing.ParsedObjects;
 using OSPC.Utils.Helpers;
 
-using BeatmapFilter = OSPC.Utils.Parsing.BeatmapFilter;
-using ComparisonFilter = OSPC.Utils.ComparisonFilter;
-using SearchParams = OSPC.Utils.Parsing.SearchParams;
+using ComparisonFilter = OSPC.Parsing.Filters.ComparisonFilter;
 
 namespace OSPC.Tests.Unit
 {

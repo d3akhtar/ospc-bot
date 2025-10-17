@@ -2,11 +2,11 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using OSPC.Utils.Parsing.Regex.Interfaces;
-using OSPC.Utils.Parsing.Regex.NamedGroupMatchValues;
 using OSPC.Domain.Common;
+using OSPC.Parsing.Regex.Interfaces;
+using OSPC.Parsing.Regex.NamedGroupMatchValues;
 
-namespace OSPC.Utils.Parsing.Regex
+namespace OSPC.Parsing.Regex
 {
     public class RegexEvaluator
     {

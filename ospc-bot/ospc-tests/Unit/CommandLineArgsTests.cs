@@ -7,6 +7,8 @@ namespace OSPC.Tests.Unit
 		[InlineData("-c", "true")]
 		[InlineData("--caching", "false")]
 		[InlineData("--caching", "true")]
+		[InlineData("-a", "randomfilepath")]
+		[InlineData("--appsettings", "randomfilepath")]
 		public void CommandLineArgsParseSuccessTests(params string[] args)
 		{
 			CommandLineArgs.Parse(args);
@@ -21,7 +23,7 @@ namespace OSPC.Tests.Unit
 		}
 
 		[Theory]
-		[InlineData("-a", "thing")]
+		[InlineData("-e", "thing")]
 		[InlineData("-b", "thing")]
 		[InlineData("--invalidflag", "thing")]
 		public void CommandLineArgsParseFailWithArgumentExceptionTests(params string[] args)
