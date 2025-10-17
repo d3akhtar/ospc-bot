@@ -1,8 +1,10 @@
 using Discord;
 
+using OSPC.Bot.Enums;
+
 namespace OSPC.Bot.Component
 {
-    public class Button
+    public class ButtonUtils
     {
         public static ButtonBuilder CreateButtonBuilder(string label, string id, bool disabledCondition = false)
             => new ButtonBuilder()
@@ -20,8 +22,8 @@ namespace OSPC.Bot.Component
                         .WithButton(CreateButtonBuilder("⏪", "first_page", msgId == 0 ? true:BotClient.Instance.CurrentPageForEmbed[msgId] == 1))
                         .WithButton(CreateButtonBuilder("◀️", "prev_page", msgId == 0 ? true:BotClient.Instance.CurrentPageForEmbed[msgId] == 1))
                         .WithButton(CreateButtonBuilder("*️⃣", "choose_page"))
-                        .WithButton(CreateButtonBuilder("▶️", "next_page", msgId == 0 ? false:BotClient.Instance.CurrentPageForEmbed[msgId] == Embeded.ActiveEmbeds[msgId].TotalPages))
-                        .WithButton(CreateButtonBuilder("⏩", "last_page", msgId == 0 ? false:BotClient.Instance.CurrentPageForEmbed[msgId] == Embeded.ActiveEmbeds[msgId].TotalPages))
+                        .WithButton(CreateButtonBuilder("▶️", "next_page", msgId == 0 ? false:BotClient.Instance.CurrentPageForEmbed[msgId] == EmbededUtils.ActiveEmbeds[msgId].TotalPages))
+                        .WithButton(CreateButtonBuilder("⏩", "last_page", msgId == 0 ? false:BotClient.Instance.CurrentPageForEmbed[msgId] == EmbededUtils.ActiveEmbeds[msgId].TotalPages))
                     }
                 ).Build();
 
@@ -35,15 +37,5 @@ namespace OSPC.Bot.Component
                 "last_page" => ButtonType.LastPage,
                 _ => ButtonType.Unknown
             };
-    }
-
-    public enum ButtonType
-    {
-        Unknown,
-        FirstPage,
-        PreviousPage,
-        ChoosePage,
-        NextPage,
-        LastPage
     }
 }

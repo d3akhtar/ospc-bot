@@ -3,11 +3,6 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 
-using MySql.Data.MySqlClient;
-
-using OSPC.Domain.Options;
-using OSPC.Utils;
-
 using Serilog;
 using Serilog.Events;
 

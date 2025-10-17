@@ -1,3 +1,4 @@
+using OSPC.Domain.Common;
 using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
 
 namespace OSPC.Utils.Parsing.RegularExpressions

@@ -1,11 +1,11 @@
-using Discord;
 using Discord.Interactions;
 
 using Microsoft.Extensions.Logging;
 
-using OSPC.Bot.Command;
 using OSPC.Bot.Component;
-using OSPC.Bot.Context;
+using OSPC.Bot.Extensions;
+using OSPC.Bot.Service;
+using OSPC.Domain.Common;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
 using OSPC.Utils;
@@ -30,7 +30,7 @@ namespace OSPC.Bot.Module.Interaction
         }
 
         private async Task PageForEmbedUpdated(ulong id)
-            => await Embeded.PageForEmbedUpdated(_osuWebClient, _beatmapRepo, id);
+            => await EmbededUtils.PageForEmbedUpdated(_osuWebClient, _beatmapRepo, id);
 
         [SlashCommand("most-played", "Get most played beatmaps for a user")]
         public async Task GetMostPlayed(string username)

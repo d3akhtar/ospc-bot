@@ -3,6 +3,7 @@ namespace OSPC
 	public class CommandLineArgs
 	{
 		public required bool DisableCaching { get; set; }
+        public required string AppsettingsFilePath { get; set; }
 
 		public static CommandLineArgs Parse(string[] args)
 		{
@@ -18,6 +19,12 @@ namespace OSPC
 							botArgs.DisableCaching = bool.Parse(args[++i]); 
 							break;
 						}
+                    case "--appsettings":
+                    case "-a":
+                        {
+                            botArgs.AppsettingsFilePath = args[++i];
+                            break;
+                        }
 					default: throw new ArgumentException($"Invalid flag: {args[i]}");
 				}
 			}
@@ -27,7 +34,8 @@ namespace OSPC
 
 		public static CommandLineArgs Default => new()
 		{
-			DisableCaching = false
+			DisableCaching = false,
+            AppsettingsFilePath = Path.Join(Directory.GetCurrentDirectory(), "appsettings.json")
 		};
 	}
 }

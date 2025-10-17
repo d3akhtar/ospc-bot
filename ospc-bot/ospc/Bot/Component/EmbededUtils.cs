@@ -4,12 +4,12 @@ using OSPC.Bot.Context;
 using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
-using OSPC.Utils;
-using OSPC.Utils.Parsing;
+using OSPC.Bot.Enums;
+using OSPC.Domain.Common;
 
 namespace OSPC.Bot.Component
 {
-    public static class Embeded
+    public static class EmbededUtils
     {
         private const int LIMIT = 25;
         private const int BUTTON_DELETE_TIME = 30;
@@ -149,7 +149,7 @@ namespace OSPC.Bot.Component
                 var stats = await osuWebClient.GetUserRankStatistics(context.User.Id);
                 var newEmbed = GetEmbedForBeatmapPlaycount(pageNumber, mostPlayed, context.User, context, stats);
                 await context.Message.ModifyAsync(
-                    msg => { msg.Embed = newEmbed; msg.Components = Button.GetPageButtonGroup(id); },
+                    msg => { msg.Embed = newEmbed; msg.Components = ButtonUtils.GetPageButtonGroup(id); },
                     options: new RequestOptions
                     {
                         Timeout = 5000,

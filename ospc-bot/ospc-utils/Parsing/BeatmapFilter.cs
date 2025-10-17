@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 
 using OSPC.Utils.Parsing.RegularExpressions.Limitations;
 using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;

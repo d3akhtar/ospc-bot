@@ -4,8 +4,6 @@ using OSPC.Utils.Parsing.RegularExpressions.Limitations;
 using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
 using OSPC.Utils.Parsing.RegularExpressions.Results;
 
-using User = OSPC.Domain.Model.User;
-
 namespace OSPC.Utils.Parsing
 {
     public class SearchParams : Parsable<SearchParams>

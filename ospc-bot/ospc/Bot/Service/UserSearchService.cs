@@ -1,19 +1,20 @@
 using Microsoft.Extensions.Logging;
-
+using OSPC.Bot.Context;
+using OSPC.Domain.Common;
 using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
 using OSPC.Utils;
 
-namespace OSPC.Bot.Search.UserSearch
+namespace OSPC.Bot.Service
 {
-    public class UserSearch : IUserSearch
+    public class UserSearchService : IUserSearchService
     {
-        private readonly ILogger<UserSearch> _logger;
+        private readonly ILogger<UserSearchService> _logger;
         private readonly IUserRepository _userRepo;
         private readonly IOsuWebClient _osuWebClient;
 
-        public UserSearch(ILogger<UserSearch> logger, IUserRepository userRepo, IOsuWebClient osuWebClient)
+        public UserSearchService(ILogger<UserSearchService> logger, IUserRepository userRepo, IOsuWebClient osuWebClient)
         {
             _logger = logger;
             _userRepo = userRepo;

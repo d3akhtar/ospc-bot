@@ -2,7 +2,7 @@ using Moq;
 
 using MySql.Data.MySqlClient;
 
-using OSPC.Utils;
+using OSPC.Domain.Common;
 
 namespace OSPC.Tests.DefaultValueProviders
 {

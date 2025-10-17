@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 
 using OSPC.Utils.Parsing.RegularExpressions.Interfaces;
 using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
+using OSPC.Domain.Common;
 
 namespace OSPC.Utils.Parsing.RegularExpressions
 {
@@ -19,7 +20,7 @@ namespace OSPC.Utils.Parsing.RegularExpressions
         private struct RegexGroup
         {
             public List<IRegexGroupLimitation> Limitations = new();
-            public Regex Regex;
+            public System.Text.RegularExpressions.Regex Regex;
             public RegexGroupType GroupType;
             public string Name = string.Empty;
             public NamedGroupMatchValue MatchValue;

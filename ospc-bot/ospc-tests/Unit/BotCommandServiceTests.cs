@@ -2,18 +2,16 @@ using Microsoft.Extensions.Logging;
 
 using Moq;
 
-using OSPC.Bot.Command;
-using OSPC.Bot.Search.UserSearch;
+using OSPC.Bot.Service;
 using OSPC.Domain.Model;
 using OSPC.Infrastructure.Database.Repository;
 using OSPC.Infrastructure.Http;
 using OSPC.Infrastructure.Job;
 using OSPC.Tests.Extensions;
-using OSPC.Utils;
 
 using Xunit.Abstractions;
 
-using ChannelOsuContext = OSPC.Utils.ChannelOsuContext;
+using ChannelOsuContext = OSPC.Bot.Context.ChannelOsuContext;
 using SearchParams = OSPC.Utils.Parsing.SearchParams;
 
 namespace OSPC.Tests.Unit
@@ -27,7 +25,7 @@ namespace OSPC.Tests.Unit
         private Mock<ILogger<BotCommandService>> _loggerMock;
         private Mock<IUserRepository> _userRepoMock;
         private Mock<IBeatmapRepository> _beatmapRepoMock;
-        private Mock<IUserSearch> _userSearchMock;
+        private Mock<IUserSearchService> _userSearchMock;
         private Mock<IOsuWebClient> _osuWebClientMock;
         private Mock<IPlaycountFetchJobQueue> _playcountFetchJobQueueMock;
 
