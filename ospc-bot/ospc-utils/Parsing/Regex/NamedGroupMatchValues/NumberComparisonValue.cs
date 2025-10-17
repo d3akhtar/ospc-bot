@@ -1,6 +1,6 @@
 using OSPC.Domain.Common;
 
-namespace OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues
+namespace OSPC.Utils.Parsing.Regex.NamedGroupMatchValues
 {
     public record NumberComparisonValue : NamedGroupMatchValue
     {

@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 
-using OSPC.Utils.Parsing.RegularExpressions.Limitations;
-using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
+using OSPC.Utils.Parsing.Regex.Limitations;
+using OSPC.Utils.Parsing.Regex.NamedGroupMatchValues;
 
 namespace OSPC.Utils.Parsing
 {

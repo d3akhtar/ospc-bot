@@ -1,7 +1,7 @@
 using OSPC.Tests.Attributes;
 using OSPC.Utils;
 using OSPC.Utils.Parsing;
-using OSPC.Utils.Parsing.RegularExpressions.Results;
+using OSPC.Utils.Parsing.Regex.Results;
 
 namespace OSPC.Tests.Unit
 {

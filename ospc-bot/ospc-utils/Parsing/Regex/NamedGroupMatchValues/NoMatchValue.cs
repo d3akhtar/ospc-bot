@@ -1,4 +1,4 @@
-namespace OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues
+namespace OSPC.Utils.Parsing.Regex.NamedGroupMatchValues
 {
     public record NoMatchValue(string Name) : NamedGroupMatchValue(Name);    
 }

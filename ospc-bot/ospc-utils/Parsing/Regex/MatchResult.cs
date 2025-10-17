@@ -1,7 +1,7 @@
 using OSPC.Domain.Common;
-using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
+using OSPC.Utils.Parsing.Regex.NamedGroupMatchValues;
 
-namespace OSPC.Utils.Parsing.RegularExpressions
+namespace OSPC.Utils.Parsing.Regex
 {
     public class MatchResult
     {

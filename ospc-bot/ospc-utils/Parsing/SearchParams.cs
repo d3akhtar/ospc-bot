@@ -1,8 +1,8 @@
 using MySql.Data.MySqlClient;
-using OSPC.Utils.Parsing.RegularExpressions;
-using OSPC.Utils.Parsing.RegularExpressions.Limitations;
-using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
-using OSPC.Utils.Parsing.RegularExpressions.Results;
+using OSPC.Utils.Parsing.Regex;
+using OSPC.Utils.Parsing.Regex.Limitations;
+using OSPC.Utils.Parsing.Regex.NamedGroupMatchValues;
+using OSPC.Utils.Parsing.Regex.Results;
 
 namespace OSPC.Utils.Parsing
 {
