@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
 
-using OSPC.Utils.Parsing.RegularExpressions.Interfaces;
+using OSPC.Utils.Parsing.Regex.Interfaces;
 
-namespace OSPC.Utils.Parsing.RegularExpressions.Limitations
+namespace OSPC.Utils.Parsing.Regex.Limitations
 {
     public class LimitMatchCount : IRegexGroupLimitation
     {

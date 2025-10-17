@@ -1,5 +1,5 @@
 using OSPC.Utils;
-using OSPC.Utils.Parsing.RegularExpressions.NamedGroupMatchValues;
+using OSPC.Utils.Parsing.Regex.NamedGroupMatchValues;
 
 namespace OSPC.Tests.Unit
 {

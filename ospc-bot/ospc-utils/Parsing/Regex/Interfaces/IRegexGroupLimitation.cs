@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace OSPC.Utils.Parsing.RegularExpressions.Interfaces
+namespace OSPC.Utils.Parsing.Regex.Interfaces
 {
     public interface IRegexGroupLimitation
     {
