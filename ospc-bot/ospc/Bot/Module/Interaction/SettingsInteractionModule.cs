@@ -21,11 +21,11 @@ namespace OSPC.Bot.Module.Interaction
 
         [SlashCommand("load", "Load beatmap playcounts for a user")]
         public async Task LoadBeatmapPlaycounts(string username = Unspecified.User)
-            => await RespondBotCommandResultAsync(await _botCmds.LoadBeatmapPlaycounts(Context.GetOsuContext(), username));
+            => await RespondAsync(await _botCmds.LoadBeatmapPlaycounts(Context.GetOsuContext(), username));
 
         [SlashCommand("link-profile", "Link your osu profile")]
         public async Task LinkProfile(string username)
-            => await RespondBotCommandResultAsync(await _botCmds.LoadBeatmapPlaycounts(Context.GetOsuContext(), username));
+            => await RespondAsync(await _botCmds.LoadBeatmapPlaycounts(Context.GetOsuContext(), username));
 
         [SlashCommand("help", "Get help about commands and what they do")]
         public async Task Help(string command = Unspecified.BotCommand)

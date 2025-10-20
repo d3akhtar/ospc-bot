@@ -2,70 +2,12 @@ using Discord;
 
 using OSPC.Bot.Context;
 using OSPC.Domain.Model;
-using OSPC.Infrastructure.Database.Repository;
-using OSPC.Infrastructure.Http;
-using OSPC.Bot.Enums;
 using OSPC.Domain.Common;
 
 namespace OSPC.Bot.Component
 {
     public static class EmbededUtils
     {
-        private const int LIMIT = 25;
-        private const int BUTTON_DELETE_TIME = 30;
-        public static Dictionary<ulong, PlaycountEmbedContext> ActiveEmbeds = new();
-        public static Dictionary<ulong, Timer> ButtonDeleteTimers = new();
-
-        public static void CreatePlaycountListEmbed(PlaycountEmbedContext ctx)
-        {
-            ActiveEmbeds.Add(ctx.Message!.Id, ctx);
-            StartTask(ctx.Message);
-        }
-        public static void StartTask(IUserMessage message)
-        {
-            BotClient.Instance.CurrentPageForEmbed.Add(message.Id, 1);
-            BotClient.Instance.LastButtonIdClickedForEmbeded.Add(message.Id, ButtonType.Unknown);
-            if (!ButtonDeleteTimers.ContainsKey(message.Id))
-                ButtonDeleteTimers.Add(message.Id, new Timer(
-                    async _ => await DeleteButtons(message)
-                ));
-            ResetTimer(message);
-        }
-
-        public static void PauseTimer(IUserMessage message)
-        {
-            if (ButtonDeleteTimers.TryGetValue(message.Id, out Timer? timer) && timer != null)
-            {
-                timer.Change(Timeout.Infinite, Timeout.Infinite);
-            }
-        }
-
-        public static void ResetTimer(IUserMessage message)
-        {
-            if (ButtonDeleteTimers.TryGetValue(message.Id, out Timer? timer) && timer != null)
-            {
-                timer.Change(TimeSpan.FromSeconds(BUTTON_DELETE_TIME), TimeSpan.FromSeconds(BUTTON_DELETE_TIME));
-            }
-        }
-
-        private async static Task DeleteButtons(IUserMessage message)
-        {
-            await message.ModifyAsync(
-                msg => msg.Components = new ComponentBuilder().Build(),
-                options: new RequestOptions
-                {
-                    Timeout = 5000,
-                    RetryMode = RetryMode.RetryRatelimit | RetryMode.RetryTimeouts,
-                }
-            );
-
-            BotClient.Instance.CurrentPageForEmbed.Remove(message.Id);
-            BotClient.Instance.LastButtonIdClickedForEmbeded.Remove(message.Id);
-            ActiveEmbeds.Remove(message.Id);
-            ButtonDeleteTimers[message.Id].Dispose();
-            ButtonDeleteTimers.Remove(message.Id);
-        }
-
         public static Embed GetEmbedForBeatmapPlaycount
             (int pageNumber, List<BeatmapPlaycount> beatmapPlaycount, User user, PlaycountEmbedContext ctx, UserRankStatistic? stats)
         {
@@ -135,29 +77,6 @@ namespace OSPC.Bot.Component
                 .WithDescription(message)
                 .WithColor(Color.Blue)
                 .Build();
-
-        public static async Task PageForEmbedUpdated(
-            IOsuWebClient osuWebClient, IBeatmapRepository beatmapRepo, ulong id)
-        {
-            if (ActiveEmbeds.ContainsKey(id))
-            {
-                PlaycountEmbedContext context = ActiveEmbeds[id];
-                int pageNumber = BotClient.Instance.CurrentPageForEmbed[context.Message!.Id];
-                List<BeatmapPlaycount> mostPlayed = await QueryPlaycountBasedOffEmbedContext(
-                    osuWebClient, beatmapRepo, context, pageNumber
-                );
-                var stats = await osuWebClient.GetUserRankStatistics(context.User.Id);
-                var newEmbed = GetEmbedForBeatmapPlaycount(pageNumber, mostPlayed, context.User, context, stats);
-                await context.Message.ModifyAsync(
-                    msg => { msg.Embed = newEmbed; msg.Components = ButtonUtils.GetPageButtonGroup(id); },
-                    options: new RequestOptions
-                    {
-                        Timeout = 5000,
-                        RetryMode = RetryMode.RetryTimeouts,
-                    }
-                );
-            }
-        }
 
         public static Embed BuildHelpEmbed()
             => new EmbedBuilder()
@@ -331,32 +250,5 @@ namespace OSPC.Bot.Component
 
         private static string ConvertToInline(params string[] words)
             => words.Aggregate("", (acc, curr) => acc += $"`{curr}` ");
-
-        private static async Task<List<BeatmapPlaycount>> QueryPlaycountBasedOffEmbedContext(
-            IOsuWebClient osuWebClient,
-            IBeatmapRepository beatmapRepo,
-            PlaycountEmbedContext context,
-            int pageNumber)
-        {
-            if (!context.Filtered)
-            {
-                return await osuWebClient.GetBeatmapPlaycountsForUser
-                (context.User.Id, LIMIT, LIMIT * (pageNumber - 1));
-            }
-            else
-            {
-                var filterResult = await beatmapRepo.FilterBeatmapPlaycountsForUser(
-                    context.SearchParams!,
-                    context.User.Id,
-                    LIMIT,
-                    pageNumber
-                );
-
-                if (!filterResult.Successful)
-                    return [];
-                else
-                    return filterResult.Value!;
-            }
-        }
     }
 }

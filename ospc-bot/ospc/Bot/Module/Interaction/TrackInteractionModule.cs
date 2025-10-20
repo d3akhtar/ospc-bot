@@ -2,7 +2,6 @@ using Discord.Interactions;
 
 using Microsoft.Extensions.Logging;
 
-using OSPC.Bot.Component;
 using OSPC.Bot.Extensions;
 using OSPC.Bot.Service;
 using OSPC.Domain.Common;
@@ -27,20 +26,16 @@ namespace OSPC.Bot.Module.Interaction
             _logger = logger;
             _beatmapRepo = beatmapRepo;
             _osuWebClient = osuWebClient;
-            BotClient.Instance.PageForEmbedUpdated += PageForEmbedUpdated;
             _botCmds = botCmds;
         }
 
-        private async Task PageForEmbedUpdated(ulong id)
-            => await EmbededUtils.PageForEmbedUpdated(_osuWebClient, _beatmapRepo, id);
-
         [SlashCommand("most-played", "Get most played beatmaps for a user")]
         public async Task GetMostPlayed(string username)
-            => await RespondBotCommandResultAsync(await _botCmds.GetMostPlayed(Context.GetOsuContext(), username));
+            => await RespondAsync(await _botCmds.GetMostPlayed(Context.GetOsuContext(), username));
 
         [SlashCommand("playcount", "Get the playcount on a beatmap for a user")]
         public async Task GetPlaycount(string username = Unspecified.User, int beatmapId = Unspecified.Beatmap)
-            => await RespondBotCommandResultAsync(await _botCmds.GetPlaycount(Context.GetOsuContext(), username, beatmapId));
+            => await RespondAsync(await _botCmds.GetPlaycount(Context.GetOsuContext(), username, beatmapId));
 
         [SlashCommand("search", "Search for beatmaps in most played")]
         public async Task Search(
@@ -77,7 +72,7 @@ namespace OSPC.Bot.Module.Interaction
                     BeatmapFilter = beatmapFilterParseResult.Value!
                 };
 
-                await RespondBotCommandResultAsync(await _botCmds.Search(Context.GetOsuContext(), searchParams));
+                await RespondAsync(await _botCmds.Search(Context.GetOsuContext(), searchParams));
             }
         }
 

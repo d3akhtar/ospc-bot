@@ -32,8 +32,6 @@ namespace OSPC.Bot
         private PagedMessageHandler _pagedMessageHandler;
 
         // TODO: THIS SUCKS, DO IT ANOTHER WAY AT SOME POINT
-        public async Task InvokePageForEmbedUpdatedEvent(ulong id) => await PageForEmbedUpdated!.Invoke(id);
-        public event Func<ulong, Task>? PageForEmbedUpdated;
         public Dictionary<ulong, int> CurrentPageForEmbed { get; set; } = new();
         public Dictionary<ulong, ButtonType> LastButtonIdClickedForEmbeded { get; set; } = new();
 
